@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Parsing\LearnAInalytics.Parsing.Contracts\LearnAInalytics.Parsing.Contracts.csproj" />
+    <ProjectReference Include="..\..\Reporting\LearnAInalytics.Reporting.Contracts\LearnAInalytics.Reporting.Contracts.csproj" />
+    <ProjectReference Include="..\..\Validation\LearnAInalytics.Validation.Contracts\LearnAInalytics.Validation.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

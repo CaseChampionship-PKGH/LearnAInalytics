@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\LearnAInalytics.Common.Mvc\LearnAInalytics.Common.Mvc.csproj" />
+    <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent.OpenAI\LearnAInalytics.Agent.OpenAI.csproj" />
+    <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent.YandexGPT\LearnAInalytics.Agent.YandexGPT.csproj" />
+    <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent\LearnAInalytics.Agent.csproj" />
+    <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Archive\LearnAInalytics.Parsing.Archive.csproj" />
+    <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Csv\LearnAInalytics.Parsing.Csv.csproj" />
+    <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Json\LearnAInalytics.Parsing.Json.csproj" />
+    <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing\LearnAInalytics.Parsing.csproj" />
+    <ProjectReference Include="..\Core\Reporting\LearnAInalytics.Reporting\LearnAInalytics.Reporting.csproj" />
+    <ProjectReference Include="..\Core\Services\LearnAInalytics.Services.Contracts\LearnAInalytics.Services.Contracts.csproj" />
+    <ProjectReference Include="..\Core\Services\LearnAInalytics.Services\LearnAInalytics.Services.csproj" />
+    <ProjectReference Include="..\Core\Validation\LearnAInalytics.Validation\LearnAInalytics.Validation.csproj" />
+  </ItemGroup>
+
+</Project>
