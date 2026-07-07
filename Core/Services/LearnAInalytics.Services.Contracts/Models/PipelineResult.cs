@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Reporting.Contracts.Models;
+﻿using LearnAInalytics.Entities.Models;
 
 namespace LearnAInalytics.Services.Contracts.Models;
 
@@ -7,18 +7,23 @@ namespace LearnAInalytics.Services.Contracts.Models;
 /// </summary>
 public record PipelineResult
 {
-    /// <summary>
-    /// Отчёт
-    /// </summary>
-    public ReportData ReportData { get; set; } = null!;
+    ///// <summary>
+    ///// Отчёт
+    ///// </summary>
+    //public ReportData ReportData { get; set; } = null!;
+
+    ///// <summary>
+    ///// Результат анализа
+    ///// </summary>
+    //public byte[] ExcelReport { get; set; } = null!;
+
+    ///// <summary>
+    ///// Список возникших в процессе анализа ошибок
+    ///// </summary>
+    //public List<string> Errors { get; set; } = null!;
 
     /// <summary>
-    /// Результат анализа
+    /// Парсированный список
     /// </summary>
-    public byte[] ExcelReport { get; set; } = null!;
-
-    /// <summary>
-    /// Список возникших в процессе анализа ошибок
-    /// </summary>
-    public List<string> Errors { get; set; } = null!;
+    public List<SurveyResponse> ParsedResult { get; set; } = null!;
 }

@@ -9,7 +9,6 @@ namespace LearnAInalytics.Parsing;
 /// </summary>
 public class FormatDetector : IFormatDetector
 {
-    // Сигнатуры для определения формата по содержимому
     private readonly static byte[] jsonStartBytes = { 0x5B };  // '['
     private readonly static byte[] jsonStartBytes2 = { 0x7B }; // '{'
     private readonly static byte[] zipSignature = { 0x50, 0x4B, 0x03, 0x04 }; // PK..
@@ -30,9 +29,9 @@ public class FormatDetector : IFormatDetector
         ".zip", ".gz", ".tar", ".7z"
     };
 
-    private readonly static HashSet<string> folderUploadExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private readonly static HashSet<string> excelExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".zip", ".gz"
+        ".xlsx", ".xlsm", ".xls"
     };
 
     /// <summary>
@@ -50,7 +49,6 @@ public class FormatDetector : IFormatDetector
             throw new ParsingException("Не указаны ни имя файла, ни содержимое для определения формата.");
         }
 
-        // 1. Пробуем определить по расширению
         var extension = Path.GetExtension(fileName)?.ToLowerInvariant() ?? string.Empty;
 
         if (jsonExtensions.Contains(extension))
@@ -63,12 +61,16 @@ public class FormatDetector : IFormatDetector
             return InputFormat.Csv;
         }
 
+        if (excelExtensions.Contains(extension))
+        {
+            return InputFormat.Excel;
+        }
+
         if (archiveExtensions.Contains(extension))
         {
             return InputFormat.Archive;
         }
 
-        // 2. Если расширение не дало результата, смотрим содержимое
         if (content is { Length: > 0 })
         {
             content.Position = 0;
@@ -90,7 +92,7 @@ public class FormatDetector : IFormatDetector
             }
         }
 
-        // 3. Если имя файла пустое, но поток есть — последняя попытка
+        // 3. Последняя попытка по тексту
         if (string.IsNullOrWhiteSpace(fileName) && content is { Length: > 0 })
         {
             content.Position = 0;
@@ -111,7 +113,7 @@ public class FormatDetector : IFormatDetector
 
         throw new ParsingException(
             $"Не удалось определить формат данных. Имя файла: '{fileName ?? "отсутствует"}'. " +
-            $"Поддерживаемые расширения: .json, .csv, .zip.");
+            $"Поддерживаемые расширения: .json, .csv, .xlsx, .zip.");
     }
 
     /// <summary>

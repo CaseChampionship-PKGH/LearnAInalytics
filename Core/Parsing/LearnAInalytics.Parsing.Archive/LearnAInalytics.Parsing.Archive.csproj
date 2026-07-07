@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LearnAInalytics.Parsing.Csv\LearnAInalytics.Parsing.Csv.csproj" />
+    <ProjectReference Include="..\LearnAInalytics.Parsing.Excel\LearnAInalytics.Parsing.Excel.csproj" />
     <ProjectReference Include="..\LearnAInalytics.Parsing.Json\LearnAInalytics.Parsing.Json.csproj" />
   </ItemGroup>
 

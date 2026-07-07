@@ -11,5 +11,5 @@ public interface IDataValidator
     /// <summary>
     /// Валидировать результаты теста и эталонные ответы
     /// </summary>
-    ValidationResult Validate(IEnumerable<UserTestResult> results);
+    ValidationResult Validate(IEnumerable<SurveyResponse> results);
 }

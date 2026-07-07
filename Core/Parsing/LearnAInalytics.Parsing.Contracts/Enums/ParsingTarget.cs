@@ -6,14 +6,9 @@
 public enum ParsingTarget
 {
     /// <summary>
-    /// Тесты тестируемых
+    /// Анкеты обратной связи (новый кейс)
     /// </summary>
-    UserAnswers,
-
-    /// <summary>
-    /// Эталонные ответы
-    /// </summary>
-    ReferenceAnswers,
+    Survey,
 
     /// <summary>
     /// Ответы от LLM-агентов

@@ -1,11 +1,11 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using LearnAInalytics.Analysis.Contracts.Enums;
 using LearnAInalytics.Api.Models;
 using LearnAInalytics.Parsing.Contracts.Exceptions;
 using LearnAInalytics.Reporting.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Interfaces;
 using LearnAInalytics.Services.Contracts.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LearnAInalytics.Api.Controllers;
 
@@ -34,16 +34,11 @@ public class AnalysisController : ControllerBase
     [HttpPost("run")]
     public async Task<IActionResult> RunAnalysis(
         IFormFile userAnswers,
-        IFormFile referenceAnswers,
         [FromQuery] AnalysisMethod analysisMethod = AnalysisMethod.RussianAiAgent)
     {
         if (userAnswers == null || userAnswers.Length == 0)
         {
             return BadRequest("Файл с ответами тестируемых обязателен.");
-        }
-        if (referenceAnswers == null || referenceAnswers.Length == 0)
-        {
-            return BadRequest("Файл с эталонными ответами обязателен.");
         }
 
         var context = new PipelineContext
@@ -56,8 +51,8 @@ public class AnalysisController : ControllerBase
         try
         {
             var result = await pipeline.RunAsync(context);
-            var mappedResult = mapper.Map<ReportDataApiModel>(result.ReportData);
-            return Ok(mappedResult);
+            //var mappedResult = mapper.Map<ReportDataApiModel>(result.ParsedResult);
+            return Ok(result.ParsedResult);
         }
         catch (ParsingException ex)
         {

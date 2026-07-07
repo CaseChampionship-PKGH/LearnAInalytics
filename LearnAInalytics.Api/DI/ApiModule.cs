@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Logging.Abstractions;
 using LearnAInalytics.Agent;
 using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Agent.OpenAI;
@@ -10,10 +9,12 @@ using LearnAInalytics.Parsing;
 using LearnAInalytics.Parsing.Archive;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
 using LearnAInalytics.Parsing.Csv;
+using LearnAInalytics.Parsing.Excel;
 using LearnAInalytics.Parsing.Json;
 using LearnAInalytics.Reporting;
 using LearnAInalytics.Services;
 using LearnAInalytics.Validation;
+using Microsoft.Extensions.Logging.Abstractions;
 using Module = LearnAInalytics.Common.Mvc.Module;
 
 namespace LearnAInalytics.Api.DI;
@@ -24,11 +25,11 @@ public class ApiModule : Module
     /// <inheritdoc />
     protected override void Load(IServiceCollection services)
     {
-        services.AddSingleton<UserAnswersCsvParser>();
-        services.AddSingleton<UserAnswersJsonParser>();
+        services.AddSingleton<SurveyCsvParser>();
+        services.AddSingleton<SurveyExcelParser>();
         services.AddSingleton<UserAnswersArchiveParser>();
-        services.RegisterMultipleInterfacesAssignableTo<IDataParser, UserAnswersCsvParser>(ServiceLifetime.Singleton);
-        services.RegisterMultipleInterfacesAssignableTo<IDataParser, UserAnswersJsonParser>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyCsvParser>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyExcelParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, UserAnswersArchiveParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, AgentResponseJsonParser>(ServiceLifetime.Singleton);
 
@@ -47,7 +48,7 @@ public class ApiModule : Module
         services.RegisterAsImplementedInterfaces<ParserFactory>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<FormatDetector>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<ExcelReportExporter>(ServiceLifetime.Singleton);
-        services.RegisterAsImplementedInterfaces<TestAnalysisPipeline>(ServiceLifetime.Singleton);
+        services.RegisterAsImplementedInterfaces<SurveyAnalysisPipeline>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<DataValidator>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<QuestionBatchBuilder>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<DefaultPromptProvider>(ServiceLifetime.Singleton);

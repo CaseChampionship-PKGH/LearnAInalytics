@@ -30,5 +30,5 @@ public class ReportData
     /// <summary>
     /// Распарсенные данные
     /// </summary>
-    public List<UserTestResult> ParsedUsers { get; set; } = null!;
+    public List<SurveyResponse> ParsedUsers { get; set; } = null!;
 }
