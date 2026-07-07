@@ -4,26 +4,26 @@ using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Exceptions;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
 using LearnAInalytics.Parsing.Csv;
-using LearnAInalytics.Parsing.Json;
+using LearnAInalytics.Parsing.Excel;
 
 namespace LearnAInalytics.Parsing.Archive;
 
 /// <summary>
-/// Парсер тестов тестируемых по архиву папки
+/// Парсер ответов тестируемых по архиву папки
 /// </summary>
 public class UserAnswersArchiveParser : IDataParser
 {
-    private readonly UserAnswersCsvParser csvParser;
-    private readonly UserAnswersJsonParser jsonParser;
+    private readonly SurveyCsvParser csvParser;
+    private readonly SurveyExcelParser excelParser;
     private readonly IFormatDetector formatDetector;
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="UserAnswersArchiveParser"/>
     /// </summary>
-    public UserAnswersArchiveParser(UserAnswersCsvParser csvParser, UserAnswersJsonParser jsonParser, IFormatDetector formatDetector)
+    public UserAnswersArchiveParser(SurveyCsvParser csvParser, SurveyExcelParser excelParser, IFormatDetector formatDetector)
     {
         this.csvParser = csvParser;
-        this.jsonParser = jsonParser;
+        this.excelParser = excelParser;
         this.formatDetector = formatDetector;
     }
 
@@ -31,17 +31,17 @@ public class UserAnswersArchiveParser : IDataParser
     public InputFormat Format => InputFormat.Archive;
 
     /// <inheritdoc />
-    public ParsingTarget Target => ParsingTarget.UserAnswers;
+    public ParsingTarget Target => ParsingTarget.Survey;
 
     async Task<T> IDataParser.ParseAsync<T>(Stream input)
     {
-        if (typeof(T) != typeof(List<UserTestResult>) && typeof(T) != typeof(IEnumerable<UserTestResult>))
+        if (typeof(T) != typeof(List<SurveyResponse>) && typeof(T) != typeof(IEnumerable<SurveyResponse>))
         {
             throw new ParsingException(
-                $"Парсер папки не поддерживает тип {typeof(T).Name}. Ожидался List<UserTestResult>).");
+                $"Парсер папки не поддерживает тип {typeof(T).Name}. Ожидался List<SurveyResponse>).");
         }
 
-        var allResults = new List<UserTestResult>();
+        var allResults = new List<SurveyResponse>();
         using var archive = new ZipArchive(input, ZipArchiveMode.Read, leaveOpen: true);
 
         foreach (var entry in archive.Entries)
@@ -71,15 +71,15 @@ public class UserAnswersArchiveParser : IDataParser
                 continue;
             }
 
-            List<UserTestResult>? parsed = null;
+            List<SurveyResponse>? parsed = null;
 
-            if (format == InputFormat.Json)
+            if (format == InputFormat.Excel)
             {
-                parsed = await jsonParser.ParseAsync<List<UserTestResult>>(ms);
+                parsed = await excelParser.ParseAsync<List<SurveyResponse>>(ms);
             }
             else if (format == InputFormat.Csv)
             {
-                parsed = await csvParser.ParseAsync<List<UserTestResult>>(ms);
+                parsed = await csvParser.ParseAsync<List<SurveyResponse>>(ms);
             }
 
             if (parsed != null)

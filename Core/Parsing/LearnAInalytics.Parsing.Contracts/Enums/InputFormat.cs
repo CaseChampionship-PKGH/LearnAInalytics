@@ -16,6 +16,11 @@ public enum InputFormat
     Csv,
 
     /// <summary>
+    /// Excel
+    /// </summary>
+    Excel,
+
+    /// <summary>
     /// Zip архив папок
     /// </summary>
     Archive
