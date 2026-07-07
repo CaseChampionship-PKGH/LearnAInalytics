@@ -155,6 +155,7 @@ public class SurveyAnalysisPipeline : IPipelineService
             PromptTrajectory = promptProvider.BuildTrajectoryPrompt(aggregationResult, [])
             //ReportData = reportData,
             //ExcelReport = excelBytes,
+            //Errors = validationResult.Warnings.ToList(),
         };
     }
 
