@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Entities\LearnAInalytics.Entities\LearnAInalytics.Entities.csproj" />
+    <ProjectReference Include="..\..\Parsing\LearnAInalytics.Parsing.Contracts\LearnAInalytics.Parsing.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

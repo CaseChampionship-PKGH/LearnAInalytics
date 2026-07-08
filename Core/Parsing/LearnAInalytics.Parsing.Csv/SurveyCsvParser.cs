@@ -7,6 +7,7 @@ using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Helpers;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
+using LearnAInalytics.Parsing.Contracts.Models;
 
 namespace LearnAInalytics.Parsing.Csv;
 
@@ -22,11 +23,11 @@ public class SurveyCsvParser : IDataParser
     public ParsingTarget Target => ParsingTarget.Survey;
 
     /// <inheritdoc />
-    public async Task<T> ParseAsync<T>(Stream input)
+    public async Task<T> ParseAsync<T>(Stream input, string fileName)
     {
-        if (typeof(T) != typeof(List<SurveyResponse>))
+        if (typeof(T) != typeof(List<SurveyParseResult>))
         {
-            throw new InvalidOperationException("SurveyCsvParser ожидает тип List<SurveyResponse>");
+            throw new InvalidOperationException("SurveyCsvParser ожидает тип List<SurveyParseResult>");
         }
 
         var encoding = Encoding.GetEncoding("windows-1251");
@@ -67,7 +68,8 @@ public class SurveyCsvParser : IDataParser
             };
         }
 
-        var results = new List<SurveyResponse>();
+        var questions = questionIndexes.Values.ToList();
+        var responses = new List<SurveyResponse>();
 
         while (csv.Read())
         {
@@ -134,7 +136,7 @@ public class SurveyCsvParser : IDataParser
                 answers.Add(answer);
             }
 
-            results.Add(new SurveyResponse
+            responses.Add(new SurveyResponse
             {
                 RespondentId = respondentId,
                 Position = position,
@@ -142,6 +144,19 @@ public class SurveyCsvParser : IDataParser
             });
         }
 
-        return (T)(object)results;
+        var programInfo = ProgramInfoParser.Parse(fileName);
+        programInfo.ListenersCount = responses.Count;
+
+        var result = new List<SurveyParseResult>()
+        {
+            new()
+            {
+                Questions = questions,
+                Responses = responses,
+                ProgramInfo = programInfo
+            }
+        };
+
+        return (T)(object)result;
     }
 }

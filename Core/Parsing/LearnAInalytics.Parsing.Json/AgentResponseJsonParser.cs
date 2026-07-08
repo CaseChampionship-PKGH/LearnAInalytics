@@ -23,7 +23,7 @@ public class AgentResponseJsonParser : IDataParser
     /// <inheritdoc />
     public ParsingTarget Target => ParsingTarget.AgentResponse;
 
-    async Task<T> IDataParser.ParseAsync<T>(Stream input)
+    async Task<T> IDataParser.ParseAsync<T>(Stream input, string fileName)
     {
         if (typeof(T) != typeof(AgentBatchResponse))
         {

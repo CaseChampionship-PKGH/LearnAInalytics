@@ -1,7 +1,7 @@
 ﻿using LearnAInalytics.Agent.Contracts.Interfaces;
-using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
+using LearnAInalytics.Parsing.Contracts.Models;
 using LearnAInalytics.Reporting.Contracts.Interfaces;
 using LearnAInalytics.Reporting.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Interfaces;
@@ -48,7 +48,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         var userAnswersFormat = formatDetector.DetectFormat(context.UserAnswersFileName, context.UserAnswersStream);
         var userAnswersParser = parserFactory.GetParser(userAnswersFormat, ParsingTarget.Survey);
 
-        var parsedUserAnswers = await userAnswersParser.ParseAsync<List<SurveyResponse>>(context.UserAnswersStream);
+        var surveyParseResultList = await userAnswersParser.ParseAsync<List<SurveyParseResult>>(context.UserAnswersStream, context.UserAnswersFileName);
 
         //var validationResult = dataValidator.Validate(parsedUserAnswers);
 
@@ -105,7 +105,7 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         return new PipelineResult()
         {
-            ParsedResult = parsedUserAnswers,
+            ParsedResult = surveyParseResultList,
             //ReportData = reportData,
             //ExcelReport = excelBytes,
             //Errors = validationResult.Warnings.ToList(),

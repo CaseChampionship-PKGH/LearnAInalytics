@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using LearnAInalytics.Entities.Enums;
 
 namespace LearnAInalytics.Parsing.Contracts.Helpers;
@@ -9,6 +10,8 @@ namespace LearnAInalytics.Parsing.Contracts.Helpers;
 /// </summary>
 public static class QuestionClassifier
 {
+    private readonly static Regex liWordRegex = new(@"\bли\b", RegexOptions.IgnoreCase);
+
     /// <summary>
     /// Сгенерировать id для вопроса
     /// </summary>
@@ -23,19 +26,22 @@ public static class QuestionClassifier
     /// </summary>
     public static QuestionType ClassifyQuestionType(string questionText)
     {
+        if (string.IsNullOrWhiteSpace(questionText))
+        {
+            return QuestionType.OpenText;
+        }
+
         var lower = questionText.ToLowerInvariant();
 
-        if (lower.Contains("оцените") && lower.Contains("10-балльной шкале"))
+        if (lower.Contains("оцените") && (lower.Contains("10-балльной") || lower.Contains("10 балльной")))
         {
             return QuestionType.Numeric;
         }
 
-        if (lower.Contains("чувствовали ли вы отстраненность"))
-        {
-            return QuestionType.Binary;
-        }
-
-        if (lower.Contains("вовлеченность") || lower.Contains("вовлечённость"))
+        if (liWordRegex.IsMatch(lower) ||
+            lower.Contains("да/нет") ||
+            lower.Contains("да или нет") ||
+            lower.Contains("бинарный"))
         {
             return QuestionType.Binary;
         }

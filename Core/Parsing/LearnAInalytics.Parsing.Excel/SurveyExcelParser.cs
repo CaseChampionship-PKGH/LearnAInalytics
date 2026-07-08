@@ -3,6 +3,7 @@ using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Helpers;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
+using LearnAInalytics.Parsing.Contracts.Models;
 
 namespace LearnAInalytics.Parsing.Excel;
 
@@ -18,11 +19,11 @@ public class SurveyExcelParser : IDataParser
     public ParsingTarget Target => ParsingTarget.Survey;
 
     /// <inheritdoc />
-    public Task<T> ParseAsync<T>(Stream input)
+    public Task<T> ParseAsync<T>(Stream input, string fileName)
     {
-        if (typeof(T) != typeof(List<SurveyResponse>))
+        if (typeof(T) != typeof(List<SurveyParseResult>))
         {
-            throw new InvalidOperationException("SurveyExcelParser ожидает тип List<SurveyResponse>");
+            throw new InvalidOperationException("SurveyExcelParser ожидает тип List<SurveyParseResult>");
         }
 
         using var workbook = new XLWorkbook(input);
@@ -54,7 +55,8 @@ public class SurveyExcelParser : IDataParser
             };
         }
 
-        var results = new List<SurveyResponse>();
+        var questions = questionIndexes.Values.ToList();
+        var responses = new List<SurveyResponse>();
 
         // Используем LastRowUsed, чтобы не обходить весь лист (1 млн строк)
         var lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
@@ -118,7 +120,7 @@ public class SurveyExcelParser : IDataParser
                 answers.Add(answer);
             }
 
-            results.Add(new SurveyResponse
+            responses.Add(new SurveyResponse
             {
                 RespondentId = respondentId,
                 Position = position,
@@ -126,6 +128,19 @@ public class SurveyExcelParser : IDataParser
             });
         }
 
-        return Task.FromResult((T)(object)results);
+        var programInfo = ProgramInfoParser.Parse(fileName);
+        programInfo.ListenersCount = responses.Count;
+
+        var result = new List<SurveyParseResult>()
+        {
+            new()
+            {
+                Questions = questions,
+                Responses = responses,
+                ProgramInfo = programInfo
+            }
+        };
+
+        return Task.FromResult((T)(object)result);
     }
 }

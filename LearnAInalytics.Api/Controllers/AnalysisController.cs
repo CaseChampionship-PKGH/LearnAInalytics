@@ -65,10 +65,10 @@ public class AnalysisController : ControllerBase
     }
 
     /// <summary>
-    /// Экспорт отчёта в Excel (.xlsx) с подсветкой отклонений.
+    /// Экспорт отчёта в Pdf (.pdf)
     /// </summary>
     [HttpPost("export/excel")]
-    public async Task<IActionResult> ExportToExcel([FromBody] ReportDataApiModel reportModel)
+    public async Task<IActionResult> ExportToPDF([FromBody] ReportDataApiModel reportModel)
     {
         var domainReport = mapper.Map<ReportData>(reportModel);
         var excelBytes = await pipeline.ExportReportExcel(domainReport);
