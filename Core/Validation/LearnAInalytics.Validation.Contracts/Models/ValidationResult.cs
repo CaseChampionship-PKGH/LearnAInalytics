@@ -1,4 +1,6 @@
-﻿namespace LearnAInalytics.Validation.Contracts.Models;
+﻿using LearnAInalytics.Parsing.Contracts.Models;
+
+namespace LearnAInalytics.Validation.Contracts.Models;
 
 /// <summary>
 /// Результат валидации
@@ -18,7 +20,7 @@ public record ValidationResult
     /// <summary>
     /// Валидные данные, готовые к анализу
     /// </summary>
-    public IEnumerable<ValidatedUserTestResult> ValidatedResults { get; set; } = null!;
+    public IEnumerable<SurveyParseResult> ValidatedResults { get; set; } = null!;
 
     /// <summary>
     /// Уникальный справочник вопросов (ключ = текст + | + правильный ответ)

@@ -20,5 +20,5 @@ public interface IDataParser
     /// <summary>
     /// Распарсить данные
     /// </summary>
-    Task<T> ParseAsync<T>(Stream input);
+    Task<T> ParseAsync<T>(Stream input, string fileName);
 }

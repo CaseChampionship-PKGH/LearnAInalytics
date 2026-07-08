@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Entities.Models;
+﻿using LearnAInalytics.Parsing.Contracts.Models;
 
 namespace LearnAInalytics.Services.Contracts.Models;
 
@@ -25,5 +25,5 @@ public record PipelineResult
     /// <summary>
     /// Парсированный список
     /// </summary>
-    public List<SurveyResponse> ParsedResult { get; set; } = null!;
+    public List<SurveyParseResult> ParsedResult { get; set; } = null!;
 }

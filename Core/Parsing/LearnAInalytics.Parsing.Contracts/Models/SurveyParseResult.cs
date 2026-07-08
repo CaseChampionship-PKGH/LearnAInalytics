@@ -1,0 +1,24 @@
+﻿using LearnAInalytics.Entities.Models;
+
+namespace LearnAInalytics.Parsing.Contracts.Models;
+
+/// <summary>
+/// Результат парсинга анекты
+/// </summary>
+public class SurveyParseResult
+{
+    /// <summary>
+    /// Распарсенная программа
+    /// </summary>
+    public required ProgramInfo ProgramInfo { get; set; }
+
+    /// <summary>
+    /// Уникальный справочник вопросов анкеты
+    /// </summary>
+    public required List<SurveyQuestion> Questions { get; set; }
+
+    /// <summary>
+    /// Ответы всех респондентов
+    /// </summary>
+    public required List<SurveyResponse> Responses { get; set; }
+}

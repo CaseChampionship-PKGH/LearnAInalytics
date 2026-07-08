@@ -27,10 +27,10 @@ public class ApiModule : Module
     {
         services.AddSingleton<SurveyCsvParser>();
         services.AddSingleton<SurveyExcelParser>();
-        services.AddSingleton<UserAnswersArchiveParser>();
+        services.AddSingleton<SurveyArchiveParser>();
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyCsvParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyExcelParser>(ServiceLifetime.Singleton);
-        services.RegisterMultipleInterfacesAssignableTo<IDataParser, UserAnswersArchiveParser>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyArchiveParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, AgentResponseJsonParser>(ServiceLifetime.Singleton);
 
         services.AddHttpClient("YandexGPT", client =>

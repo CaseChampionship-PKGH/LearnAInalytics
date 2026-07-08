@@ -43,6 +43,6 @@ public class LlmTestAnalysisAgent : ITestAnalysisAgent
 
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(cleanJson));
         var parser = parserFactory.GetParser(InputFormat.Json, ParsingTarget.AgentResponse);
-        return await parser.ParseAsync<AgentBatchResponse>(stream);
+        return await parser.ParseAsync<AgentBatchResponse>(stream, string.Empty);
     }
 }

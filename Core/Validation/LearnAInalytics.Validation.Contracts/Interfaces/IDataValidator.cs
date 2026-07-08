@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Entities.Models;
+﻿using LearnAInalytics.Parsing.Contracts.Models;
 using LearnAInalytics.Validation.Contracts.Models;
 
 namespace LearnAInalytics.Validation.Contracts.Interfaces;
@@ -9,7 +9,7 @@ namespace LearnAInalytics.Validation.Contracts.Interfaces;
 public interface IDataValidator
 {
     /// <summary>
-    /// Валидировать результаты теста и эталонные ответы
+    /// Валидировать результаты анектирования
     /// </summary>
-    ValidationResult Validate(IEnumerable<SurveyResponse> results);
+    ValidationResult Validate(IEnumerable<SurveyParseResult> results);
 }
