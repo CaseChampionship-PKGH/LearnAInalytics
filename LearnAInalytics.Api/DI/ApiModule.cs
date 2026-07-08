@@ -56,7 +56,7 @@ public class ApiModule : Module
         services.RegisterAsImplementedInterfaces<LlmTestAnalysisAgent>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<LlmReportAgent>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<AgentReportBuilder>(ServiceLifetime.Singleton);
-        services.RegisterAutoMapperProfile<TestAnalysisApiProfile>();
+        services.RegisterAutoMapperProfile<SurveyAnalysisApiProfile>();
         RegisterAutoMapper(services);
         services.AddHttpContextAccessor();
     }

@@ -33,7 +33,10 @@ public static class QuestionClassifier
 
         var lower = questionText.ToLowerInvariant();
 
-        if (lower.Contains("оцените") && (lower.Contains("10-балльной") || lower.Contains("10 балльной")))
+        if (lower.Contains("10-балльной")
+            || lower.Contains("10 балльной")
+            || lower.Contains("оцените")
+            || lower.Contains("10 — балльной"))
         {
             return QuestionType.Numeric;
         }

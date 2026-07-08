@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Parsing.Contracts.Models;
+﻿using LearnAInalytics.Validation.Contracts.Models;
 
 namespace LearnAInalytics.Services.Contracts.Models;
 
@@ -23,7 +23,7 @@ public record PipelineResult
     //public List<string> Errors { get; set; } = null!;
 
     /// <summary>
-    /// Парсированный список
+    /// Валидный список
     /// </summary>
-    public List<SurveyParseResult> ParsedResult { get; set; } = null!;
+    public ValidationResult ValidationResult { get; set; } = null!;
 }

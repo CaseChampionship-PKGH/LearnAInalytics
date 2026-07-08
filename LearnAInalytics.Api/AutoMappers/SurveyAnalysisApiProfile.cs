@@ -5,12 +5,12 @@ using LearnAInalytics.Reporting.Contracts.Models;
 namespace LearnAInalytics.Api.AutoMappers;
 
 /// <inheritdoc />
-public class TestAnalysisApiProfile : Profile
+public class SurveyAnalysisApiProfile : Profile
 {
     /// <summary>
-    /// Инициализирует новый экземпляр <see cref="TestAnalysisApiProfile"/>
+    /// Инициализирует новый экземпляр <see cref="SurveyAnalysisApiProfile"/>
     /// </summary>
-    public TestAnalysisApiProfile()
+    public SurveyAnalysisApiProfile()
     {
         CreateMap<ReportDataApiModel, ReportData>(MemberList.Source).ReverseMap();
         CreateMap<SummaryApiModel, Summary>(MemberList.Source).ReverseMap();

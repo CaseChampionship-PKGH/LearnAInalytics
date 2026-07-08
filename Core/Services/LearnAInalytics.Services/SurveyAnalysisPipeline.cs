@@ -50,7 +50,7 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         var surveyParseResultList = await userAnswersParser.ParseAsync<List<SurveyParseResult>>(context.UserAnswersStream, context.UserAnswersFileName);
 
-        //var validationResult = dataValidator.Validate(parsedUserAnswers);
+        var validationResult = dataValidator.Validate(surveyParseResultList);
 
         //var batches = batchBuilder.Build(validationResult);
 
@@ -105,7 +105,7 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         return new PipelineResult()
         {
-            ParsedResult = surveyParseResultList,
+            ValidationResult = validationResult,
             //ReportData = reportData,
             //ExcelReport = excelBytes,
             //Errors = validationResult.Warnings.ToList(),

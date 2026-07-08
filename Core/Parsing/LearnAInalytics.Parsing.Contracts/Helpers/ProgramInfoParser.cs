@@ -17,11 +17,11 @@ public static class ProgramInfoParser
 
         var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
 
-        var match = Regex.Match(nameWithoutExt, @"^[\d\.\-\s]+(?=[А-ЯЁA-Z]|[а-яёa-z])");
+        var match = Regex.Match(nameWithoutExt, @"^[\d\.\-\s/_]+(?=[А-ЯЁA-Zа-яёa-z])");
         if (match.Success)
         {
-            info.Period = match.Value.Trim();
-            info.Title = nameWithoutExt.Substring(match.Index + match.Length).Trim();
+            info.Period = match.Value.Trim(' ', '_', '-');
+            info.Title = nameWithoutExt.Substring(match.Index + match.Length).TrimStart(' ', '_', '-');
         }
         else
         {

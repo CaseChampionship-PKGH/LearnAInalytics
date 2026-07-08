@@ -21,9 +21,4 @@ public record ValidationResult
     /// Валидные данные, готовые к анализу
     /// </summary>
     public IEnumerable<SurveyParseResult> ValidatedResults { get; set; } = null!;
-
-    /// <summary>
-    /// Уникальный справочник вопросов (ключ = текст + | + правильный ответ)
-    /// </summary>
-    public Dictionary<string, QuestionReference> QuestionCatalog { get; set; } = null!;
 }
