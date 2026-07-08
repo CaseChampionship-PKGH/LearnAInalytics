@@ -3,6 +3,7 @@ using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Helpers;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
+using LearnAInalytics.Parsing.Contracts.Models;
 
 namespace LearnAInalytics.Parsing.Excel;
 
