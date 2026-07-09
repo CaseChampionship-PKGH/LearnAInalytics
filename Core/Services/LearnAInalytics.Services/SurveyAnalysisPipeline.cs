@@ -9,6 +9,7 @@ using LearnAInalytics.Reporting.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Interfaces;
 using LearnAInalytics.Services.Contracts.Models;
 using LearnAInalytics.Validation.Contracts.Interfaces;
+using LearnAInalytics.Validation.Contracts.Models;
 
 namespace LearnAInalytics.Services;
 
@@ -21,7 +22,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     private readonly IParserFactory parserFactory;
     private readonly IDataValidator dataValidator;
     private readonly IStatisticsCalculator statisticsCalculator;
-    private readonly IQuestionBatchBuilder batchBuilder;
+    private readonly ISurveyAggregator surveyAggregator;
     private readonly ITestAnalysisAgent testAnalysisAgent;
     private readonly IReportBuilder reportBuilder;
     private readonly IReportExporter reportExporter;
@@ -33,7 +34,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         IParserFactory parserFactory,
         IDataValidator dataValidator,
         IStatisticsCalculator statisticsCalculator,
-        IQuestionBatchBuilder batchBuilder,
+        ISurveyAggregator surveyAggregator,
         ITestAnalysisAgent testAnalysisAgent,
         IReportBuilder reportBuilder,
         IReportExporter reportExporter)
@@ -42,7 +43,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         this.parserFactory = parserFactory;
         this.dataValidator = dataValidator;
         this.statisticsCalculator = statisticsCalculator;
-        this.batchBuilder = batchBuilder;
+        this.surveyAggregator = surveyAggregator;
         this.testAnalysisAgent = testAnalysisAgent;
         this.reportBuilder = reportBuilder;
         this.reportExporter = reportExporter;
@@ -62,6 +63,13 @@ public class SurveyAnalysisPipeline : IPipelineService
         foreach (var validatedResult in validationResult.ValidatedResults)
         {
             surveyStatistics.Add(statisticsCalculator.Calculate(validatedResult));
+        }
+
+        var questionWithAnswersList = new List<QuestionWithAnswers>();
+
+        foreach (var surveyParseResult in surveyParseResultList)
+        {
+            questionWithAnswersList.Add(surveyAggregator.Aggregate(surveyParseResult));
         }
 
         //var batches = batchBuilder.Build(validationResult);

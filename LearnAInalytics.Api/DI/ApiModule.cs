@@ -51,7 +51,7 @@ public class ApiModule : Module
         services.RegisterAsImplementedInterfaces<ExcelReportExporter>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<SurveyAnalysisPipeline>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<DataValidator>(ServiceLifetime.Singleton);
-        services.RegisterAsImplementedInterfaces<QuestionBatchBuilder>(ServiceLifetime.Singleton);
+        services.RegisterAsImplementedInterfaces<SurveyAggregator>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<DefaultPromptProvider>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<LlmFactory>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<LlmTestAnalysisAgent>(ServiceLifetime.Singleton);
