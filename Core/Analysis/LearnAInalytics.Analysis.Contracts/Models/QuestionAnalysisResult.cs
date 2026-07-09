@@ -1,19 +1,90 @@
-﻿using LearnAInalytics.Validation.Contracts.Models;
+﻿using LearnAInalytics.Entities.Enums;
 
 namespace LearnAInalytics.Analysis.Contracts.Models;
 
 /// <summary>
 /// Данные анализа
 /// </summary>
-public class QuestionAnalysisResult
+public class QuestionStatistics
 {
     /// <summary>
-    /// Вопрос
+    /// Идентификатор попроса
     /// </summary>
-    public QuestionReference Question { get; set; } = null!;
+    public string QuestionId { get; set; } = string.Empty;
 
     /// <summary>
-    /// Ответы тестируемых
+    /// Текст вопроса
     /// </summary>
-    public List<ComparisonResult> Results { get; set; } = null!;
+    public string QuestionText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Тип вопроса
+    /// </summary>
+    public QuestionType Type { get; set; }
+
+    // Для Numeric
+
+    /// <summary>
+    /// Среднее арифметическое
+    /// </summary>
+    public double? Average { get; set; }
+
+    /// <summary>
+    /// Медиана
+    /// </summary>
+    public double? Median { get; set; }
+
+    /// <summary>
+    /// Стандартное 
+    /// </summary>
+    public double? StandardDeviation { get; set; }
+
+    /// <summary>
+    /// Распределение оценка → количество
+    /// </summary>
+    public Dictionary<int, int> Distribution { get; set; } = [];
+
+    /// <summary>
+    /// Процент низких баллов
+    /// </summary>
+    public double? PercentLow { get; set; }   // 1-3
+
+    /// <summary>
+    /// Процент средених баллов
+    /// </summary>
+    public double? PercentMedium { get; set; } // 4-7
+
+    /// <summary>
+    /// Процент высоких баллов
+    /// </summary>
+    public double? PercentHigh { get; set; }   // 8-10
+
+    // Для Binary
+
+    /// <summary>
+    /// Количество "Да"
+    /// </summary>
+    public int? YesCount { get; set; }
+
+    /// <summary>
+    /// Количество "Нет"
+    /// </summary>
+    public int? NoCount { get; set; }
+
+    /// <summary>
+    /// Процент  "Да"
+    /// </summary>
+    public double? YesPercent { get; set; }
+
+    /// <summary>
+    /// Процент  "Нет"
+    /// </summary>
+    public double? NoPercent { get; set; }
+
+    // Для OpenText
+
+    /// <summary>
+    /// Количество открытых ответов
+    /// </summary>
+    public int? AnswerCount { get; set; }
 }

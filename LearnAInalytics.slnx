@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/Core/Analysis/">
     <Project Path="Core/Analysis/LearnAInalytics.Analysis.Contracts/LearnAInalytics.Analysis.Contracts.csproj" Id="f701e3fb-9175-4c7d-8de4-765245a03b57" />
+    <Project Path="Core/Analysis/LearnAInalytics.Analysis/LearnAInalytics.Analysis.csproj" Id="56ca2697-c262-4741-9a0f-4bed4082fb60" />
   </Folder>
   <Folder Name="/Core/Entities/">
     <Project Path="Core/Entities/LearnAInalytics.Entities/LearnAInalytics.Entities.csproj" Id="03f072d3-5937-4d75-a76c-d4353c6e4def" />
