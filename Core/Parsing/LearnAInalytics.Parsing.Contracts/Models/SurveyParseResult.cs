@@ -13,7 +13,7 @@ public class SurveyParseResult
     public required ProgramInfo ProgramInfo { get; set; }
 
     /// <summary>
-    /// Уникальный справочник вопросов анкеты
+    /// Справочник вопросов анкеты
     /// </summary>
     public required List<SurveyQuestion> Questions { get; set; }
 
