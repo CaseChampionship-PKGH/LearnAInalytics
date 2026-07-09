@@ -3,6 +3,7 @@ using LearnAInalytics.Agent;
 using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Agent.OpenAI;
 using LearnAInalytics.Agent.YandexGPT;
+using LearnAInalytics.Analysis;
 using LearnAInalytics.Api.AutoMappers;
 using LearnAInalytics.Common.Mvc.Extensions;
 using LearnAInalytics.Parsing;
@@ -44,9 +45,9 @@ public class ApiModule : Module
             client.BaseAddress = new Uri("https://openrouter.ai/api/v1/");
         });
         services.RegisterMultipleInterfacesAssignableTo<ILlmClient, OpenAiCompatibleLlmClient>(ServiceLifetime.Singleton);
-
         services.RegisterAsImplementedInterfaces<ParserFactory>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<FormatDetector>(ServiceLifetime.Singleton);
+        services.RegisterAsImplementedInterfaces<StatisticsCalculator>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<ExcelReportExporter>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<SurveyAnalysisPipeline>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<DataValidator>(ServiceLifetime.Singleton);

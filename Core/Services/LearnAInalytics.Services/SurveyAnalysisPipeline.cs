@@ -1,4 +1,6 @@
 ﻿using LearnAInalytics.Agent.Contracts.Interfaces;
+using LearnAInalytics.Analysis.Contracts.Interfaces;
+using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
 using LearnAInalytics.Parsing.Contracts.Models;
@@ -18,6 +20,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     private readonly IFormatDetector formatDetector;
     private readonly IParserFactory parserFactory;
     private readonly IDataValidator dataValidator;
+    private readonly IStatisticsCalculator statisticsCalculator;
     private readonly IQuestionBatchBuilder batchBuilder;
     private readonly ITestAnalysisAgent testAnalysisAgent;
     private readonly IReportBuilder reportBuilder;
@@ -29,6 +32,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     public SurveyAnalysisPipeline(IFormatDetector formatDetector,
         IParserFactory parserFactory,
         IDataValidator dataValidator,
+        IStatisticsCalculator statisticsCalculator,
         IQuestionBatchBuilder batchBuilder,
         ITestAnalysisAgent testAnalysisAgent,
         IReportBuilder reportBuilder,
@@ -37,6 +41,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         this.formatDetector = formatDetector;
         this.parserFactory = parserFactory;
         this.dataValidator = dataValidator;
+        this.statisticsCalculator = statisticsCalculator;
         this.batchBuilder = batchBuilder;
         this.testAnalysisAgent = testAnalysisAgent;
         this.reportBuilder = reportBuilder;
@@ -51,6 +56,13 @@ public class SurveyAnalysisPipeline : IPipelineService
         var surveyParseResultList = await userAnswersParser.ParseAsync<List<SurveyParseResult>>(context.UserAnswersStream, context.UserAnswersFileName);
 
         var validationResult = dataValidator.Validate(surveyParseResultList);
+
+        var surveyStatistics = new List<SurveyStatistics>();
+
+        foreach (var validatedResult in validationResult.ValidatedResults)
+        {
+            surveyStatistics.Add(statisticsCalculator.Calculate(validatedResult));
+        }
 
         //var batches = batchBuilder.Build(validationResult);
 
@@ -106,6 +118,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         return new PipelineResult()
         {
             ValidationResult = validationResult,
+            SurveyStatistics = surveyStatistics,
             //ReportData = reportData,
             //ExcelReport = excelBytes,
             //Errors = validationResult.Warnings.ToList(),

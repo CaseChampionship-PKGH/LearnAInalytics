@@ -12,5 +12,5 @@ public interface IReportBuilder
     /// <summary>
     /// Построить отчёт по анализам
     /// </summary>
-    Task<ReportData> BuildAsync(List<QuestionAnalysisResult> data, AnalysisMethod analysisMethod);
+    Task<ReportData> BuildAsync(List<SurveyStatistics> data, AnalysisMethod analysisMethod);
 }

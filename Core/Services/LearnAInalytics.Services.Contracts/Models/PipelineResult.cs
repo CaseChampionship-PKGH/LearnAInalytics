@@ -1,4 +1,5 @@
-﻿using LearnAInalytics.Validation.Contracts.Models;
+﻿using LearnAInalytics.Analysis.Contracts.Models;
+using LearnAInalytics.Validation.Contracts.Models;
 
 namespace LearnAInalytics.Services.Contracts.Models;
 
@@ -26,4 +27,9 @@ public record PipelineResult
     /// Валидный список
     /// </summary>
     public ValidationResult ValidationResult { get; set; } = null!;
+
+    /// <summary>
+    /// Статистика
+    /// </summary>
+    public List<SurveyStatistics> SurveyStatistics { get; set; } = null!;
 }
