@@ -1,15 +1,13 @@
 ﻿using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Interfaces;
-using LearnAInalytics.Analysis.Contracts.Models;
+using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
-using LearnAInalytics.Parsing.Contracts.Models;
 using LearnAInalytics.Reporting.Contracts.Interfaces;
 using LearnAInalytics.Reporting.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Interfaces;
 using LearnAInalytics.Services.Contracts.Models;
 using LearnAInalytics.Validation.Contracts.Interfaces;
-using LearnAInalytics.Validation.Contracts.Models;
 
 namespace LearnAInalytics.Services;
 
@@ -22,7 +20,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     private readonly IParserFactory parserFactory;
     private readonly IDataValidator dataValidator;
     private readonly IStatisticsCalculator statisticsCalculator;
-    private readonly ISurveyAggregator surveyAggregator;
+    private readonly ICriterionAggregator criterionAggregator;
     private readonly ITestAnalysisAgent testAnalysisAgent;
     private readonly IReportBuilder reportBuilder;
     private readonly IReportExporter reportExporter;
@@ -34,7 +32,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         IParserFactory parserFactory,
         IDataValidator dataValidator,
         IStatisticsCalculator statisticsCalculator,
-        ISurveyAggregator surveyAggregator,
+        ICriterionAggregator criterionAggregator,
         ITestAnalysisAgent testAnalysisAgent,
         IReportBuilder reportBuilder,
         IReportExporter reportExporter)
@@ -43,7 +41,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         this.parserFactory = parserFactory;
         this.dataValidator = dataValidator;
         this.statisticsCalculator = statisticsCalculator;
-        this.surveyAggregator = surveyAggregator;
+        this.criterionAggregator = criterionAggregator;
         this.testAnalysisAgent = testAnalysisAgent;
         this.reportBuilder = reportBuilder;
         this.reportExporter = reportExporter;
@@ -54,23 +52,12 @@ public class SurveyAnalysisPipeline : IPipelineService
         var userAnswersFormat = formatDetector.DetectFormat(context.UserAnswersFileName, context.UserAnswersStream);
         var userAnswersParser = parserFactory.GetParser(userAnswersFormat, ParsingTarget.Survey);
 
-        var surveyParseResultList = await userAnswersParser.ParseAsync<List<SurveyParseResult>>(context.UserAnswersStream, context.UserAnswersFileName);
+        var surveyParseResult = await userAnswersParser.ParseAsync<Survey>(context.UserAnswersStream, context.UserAnswersFileName);
 
-        var validationResult = dataValidator.Validate(surveyParseResultList);
+        var validationResult = dataValidator.Validate(surveyParseResult);
 
-        var surveyStatistics = new List<SurveyStatistics>();
-
-        foreach (var validatedResult in validationResult.ValidatedResults)
-        {
-            surveyStatistics.Add(statisticsCalculator.Calculate(validatedResult));
-        }
-
-        var questionWithAnswersList = new List<QuestionWithAnswers>();
-
-        foreach (var surveyParseResult in surveyParseResultList)
-        {
-            questionWithAnswersList.Add(surveyAggregator.Aggregate(surveyParseResult));
-        }
+        var statistics = statisticsCalculator.Calculate(validationResult.ValidatedResults);
+        var aggregationResult = criterionAggregator.Aggregate(validationResult.ValidatedResults, statistics);
 
         //var batches = batchBuilder.Build(validationResult);
 
@@ -125,8 +112,7 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         return new PipelineResult()
         {
-            ValidationResult = validationResult,
-            SurveyStatistics = surveyStatistics,
+            SurveyStatistics = aggregationResult,
             //ReportData = reportData,
             //ExcelReport = excelBytes,
             //Errors = validationResult.Warnings.ToList(),

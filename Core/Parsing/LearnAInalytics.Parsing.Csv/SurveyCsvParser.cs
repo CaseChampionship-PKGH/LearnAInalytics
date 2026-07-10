@@ -7,7 +7,6 @@ using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Helpers;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
-using LearnAInalytics.Parsing.Contracts.Models;
 
 namespace LearnAInalytics.Parsing.Csv;
 
@@ -25,9 +24,9 @@ public class SurveyCsvParser : IDataParser
     /// <inheritdoc />
     public async Task<T> ParseAsync<T>(Stream input, string fileName)
     {
-        if (typeof(T) != typeof(List<SurveyParseResult>))
+        if (typeof(T) != typeof(Survey))
         {
-            throw new InvalidOperationException("SurveyCsvParser ожидает тип List<SurveyParseResult>");
+            throw new InvalidOperationException("SurveyCsvParser ожидает тип SurveyParseResult");
         }
 
         var encoding = Encoding.GetEncoding("windows-1251");
@@ -147,14 +146,11 @@ public class SurveyCsvParser : IDataParser
         var programInfo = ProgramInfoParser.Parse(fileName);
         programInfo.ListenersCount = responses.Count;
 
-        var result = new List<SurveyParseResult>()
+        var result = new Survey()
         {
-            new()
-            {
-                Questions = questions,
-                Responses = responses,
-                ProgramInfo = programInfo
-            }
+            Questions = questions,
+            Responses = responses,
+            ProgramInfo = programInfo
         };
 
         return (T)(object)result;

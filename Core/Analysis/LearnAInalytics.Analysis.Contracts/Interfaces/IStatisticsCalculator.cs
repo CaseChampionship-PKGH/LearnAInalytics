@@ -1,5 +1,5 @@
 ﻿using LearnAInalytics.Analysis.Contracts.Models;
-using LearnAInalytics.Parsing.Contracts.Models;
+using LearnAInalytics.Entities.Models;
 
 namespace LearnAInalytics.Analysis.Contracts.Interfaces;
 
@@ -11,5 +11,5 @@ public interface IStatisticsCalculator
     /// <summary>
     /// Посчитать данные анекеты
     /// </summary>
-    SurveyStatistics Calculate(SurveyParseResult parsedData);
+    SurveyStatistics Calculate(Survey parsedData);
 }

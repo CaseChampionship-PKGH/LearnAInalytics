@@ -3,7 +3,6 @@ using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Helpers;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
-using LearnAInalytics.Parsing.Contracts.Models;
 
 namespace LearnAInalytics.Parsing.Excel;
 
@@ -21,9 +20,9 @@ public class SurveyExcelParser : IDataParser
     /// <inheritdoc />
     public Task<T> ParseAsync<T>(Stream input, string fileName)
     {
-        if (typeof(T) != typeof(List<SurveyParseResult>))
+        if (typeof(T) != typeof(Survey))
         {
-            throw new InvalidOperationException("SurveyExcelParser ожидает тип List<SurveyParseResult>");
+            throw new InvalidOperationException("SurveyExcelParser ожидает тип SurveyParseResult");
         }
 
         using var workbook = new XLWorkbook(input);
@@ -131,14 +130,11 @@ public class SurveyExcelParser : IDataParser
         var programInfo = ProgramInfoParser.Parse(fileName);
         programInfo.ListenersCount = responses.Count;
 
-        var result = new List<SurveyParseResult>()
+        var result = new Survey()
         {
-            new()
-            {
-                Questions = questions,
-                Responses = responses,
-                ProgramInfo = programInfo
-            }
+            Questions = questions,
+            Responses = responses,
+            ProgramInfo = programInfo
         };
 
         return Task.FromResult((T)(object)result);

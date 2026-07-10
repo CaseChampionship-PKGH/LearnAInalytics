@@ -19,9 +19,4 @@ public enum InputFormat
     /// Excel
     /// </summary>
     Excel,
-
-    /// <summary>
-    /// Zip архив папок
-    /// </summary>
-    Archive
 }

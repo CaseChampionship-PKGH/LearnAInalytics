@@ -2,9 +2,9 @@
 using LearnAInalytics.Agent.Contracts.Enums;
 using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Agent.Contracts.Models;
+using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
-using LearnAInalytics.Validation.Contracts.Models.Batch;
 
 namespace LearnAInalytics.Agent;
 
@@ -27,9 +27,9 @@ public class LlmTestAnalysisAgent : ITestAnalysisAgent
         this.llmFactory = llmFactory;
     }
 
-    async Task<AgentBatchResponse> ITestAnalysisAgent.AnalyzeBatchAsync(QuestionBatch questionBatch, LlmVariant llmVariant)
+    async Task<AgentBatchResponse> ITestAnalysisAgent.AnalyzeBatchAsync(AggregatedCriteriaData aggregatedCriteriaData, LlmVariant llmVariant)
     {
-        var prompt = promptProvider.BuildBatchAnalysisPrompt(questionBatch);
+        var prompt = promptProvider.BuildBatchAnalysisPrompt(aggregatedCriteriaData);
         var llmClient = llmFactory.CreateLLmClient(llmVariant);
         var rawResponse = await llmClient.SendRequestAsync(new LlmRequest()
         {

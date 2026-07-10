@@ -1,14 +1,14 @@
 ﻿using LearnAInalytics.Analysis.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Entities.Enums;
-using LearnAInalytics.Parsing.Contracts.Models;
+using LearnAInalytics.Entities.Models;
 
 namespace LearnAInalytics.Analysis;
 
 /// <inheritdoc cref="IStatisticsCalculator"/>
 public class StatisticsCalculator : IStatisticsCalculator
 {
-    SurveyStatistics IStatisticsCalculator.Calculate(SurveyParseResult parsedData)
+    SurveyStatistics IStatisticsCalculator.Calculate(Survey parsedData)
     {
         var stats = new SurveyStatistics
         {

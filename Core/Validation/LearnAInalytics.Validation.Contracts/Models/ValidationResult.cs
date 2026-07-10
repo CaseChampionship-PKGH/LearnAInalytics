@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Parsing.Contracts.Models;
+﻿using LearnAInalytics.Entities.Models;
 
 namespace LearnAInalytics.Validation.Contracts.Models;
 
@@ -20,5 +20,5 @@ public record ValidationResult
     /// <summary>
     /// Валидные данные, готовые к анализу
     /// </summary>
-    public IEnumerable<SurveyParseResult> ValidatedResults { get; set; } = null!;
+    public Survey ValidatedResults { get; set; } = null!;
 }

@@ -1,5 +1,4 @@
-﻿using LearnAInalytics.Analysis.Contracts.Models;
-using LearnAInalytics.Validation.Contracts.Models;
+﻿using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
 
 namespace LearnAInalytics.Services.Contracts.Models;
 
@@ -24,12 +23,7 @@ public record PipelineResult
     //public List<string> Errors { get; set; } = null!;
 
     /// <summary>
-    /// Валидный список
-    /// </summary>
-    public ValidationResult ValidationResult { get; set; } = null!;
-
-    /// <summary>
     /// Статистика
     /// </summary>
-    public List<SurveyStatistics> SurveyStatistics { get; set; } = null!;
+    public AggregatedCriteriaData SurveyStatistics { get; set; } = null!;
 }

@@ -18,7 +18,6 @@
     <Project Path="Core/Entities/LearnAInalytics.Entities/LearnAInalytics.Entities.csproj" Id="03f072d3-5937-4d75-a76c-d4353c6e4def" />
   </Folder>
   <Folder Name="/Core/Parsing/">
-    <Project Path="Core/Parsing/LearnAInalytics.Parsing.Archive/LearnAInalytics.Parsing.Archive.csproj" Id="4d02a820-6eaa-4432-9ec8-dfaad6aa79a1" />
     <Project Path="Core/Parsing/LearnAInalytics.Parsing.Contracts/LearnAInalytics.Parsing.Contracts.csproj" Id="9e217f39-06b9-4ad1-8121-43ceb36de55f" />
     <Project Path="Core/Parsing/LearnAInalytics.Parsing.Csv/LearnAInalytics.Parsing.Csv.csproj" Id="80aebad6-6357-43b8-a40d-d66fc18def30" />
     <Project Path="Core/Parsing/LearnAInalytics.Parsing.Excel/LearnAInalytics.Parsing.Excel.csproj" Id="d1202028-b3a9-4bec-bfa1-8091c17e6833" />

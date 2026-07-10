@@ -1,6 +1,6 @@
 ﻿using LearnAInalytics.Agent.Contracts.Enums;
 using LearnAInalytics.Agent.Contracts.Models;
-using LearnAInalytics.Validation.Contracts.Models.Batch;
+using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
 
 namespace LearnAInalytics.Agent.Contracts.Interfaces;
 
@@ -12,5 +12,5 @@ public interface ITestAnalysisAgent
     /// <summary>
     /// Сравнить правильность ответа тестируемого
     /// </summary>
-    Task<AgentBatchResponse> AnalyzeBatchAsync(QuestionBatch questionBatch, LlmVariant llmVariant);
+    Task<AgentBatchResponse> AnalyzeBatchAsync(AggregatedCriteriaData aggregatedCriteriaData, LlmVariant llmVariant);
 }

@@ -16,7 +16,6 @@
     <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent.YandexGPT\LearnAInalytics.Agent.YandexGPT.csproj" />
     <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent\LearnAInalytics.Agent.csproj" />
     <ProjectReference Include="..\Core\Analysis\LearnAInalytics.Analysis\LearnAInalytics.Analysis.csproj" />
-    <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Archive\LearnAInalytics.Parsing.Archive.csproj" />
     <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Csv\LearnAInalytics.Parsing.Csv.csproj" />
     <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Excel\LearnAInalytics.Parsing.Excel.csproj" />
     <ProjectReference Include="..\Core\Parsing\LearnAInalytics.Parsing.Json\LearnAInalytics.Parsing.Json.csproj" />

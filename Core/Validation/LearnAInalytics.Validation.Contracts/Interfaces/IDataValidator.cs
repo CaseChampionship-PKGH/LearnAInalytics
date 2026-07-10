@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Parsing.Contracts.Models;
+﻿using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Validation.Contracts.Models;
 
 namespace LearnAInalytics.Validation.Contracts.Interfaces;
@@ -11,5 +11,5 @@ public interface IDataValidator
     /// <summary>
     /// Валидировать результаты анектирования
     /// </summary>
-    ValidationResult Validate(IEnumerable<SurveyParseResult> results);
+    ValidationResult Validate(Survey results);
 }

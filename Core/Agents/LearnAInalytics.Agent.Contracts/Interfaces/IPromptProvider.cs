@@ -1,5 +1,5 @@
-﻿using LearnAInalytics.Reporting.Contracts.Models;
-using LearnAInalytics.Validation.Contracts.Models.Batch;
+﻿using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
+using LearnAInalytics.Reporting.Contracts.Models;
 
 namespace LearnAInalytics.Agent.Contracts.Interfaces;
 
@@ -11,7 +11,7 @@ public interface IPromptProvider
     /// <summary>
     /// Преобразовать данные одного вопроса в промпт анализа
     /// </summary>
-    string BuildBatchAnalysisPrompt(QuestionBatch batch);
+    string BuildBatchAnalysisPrompt(AggregatedCriteriaData aggregatedCriteriaData);
 
     /// <summary>
     /// Преобразовать данные одного вопроса в промпт создания отчёта

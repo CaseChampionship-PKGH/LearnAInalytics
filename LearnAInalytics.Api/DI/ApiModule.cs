@@ -7,7 +7,6 @@ using LearnAInalytics.Analysis;
 using LearnAInalytics.Api.AutoMappers;
 using LearnAInalytics.Common.Mvc.Extensions;
 using LearnAInalytics.Parsing;
-using LearnAInalytics.Parsing.Archive;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
 using LearnAInalytics.Parsing.Csv;
 using LearnAInalytics.Parsing.Excel;
@@ -26,12 +25,8 @@ public class ApiModule : Module
     /// <inheritdoc />
     protected override void Load(IServiceCollection services)
     {
-        services.AddSingleton<SurveyCsvParser>();
-        services.AddSingleton<SurveyExcelParser>();
-        services.AddSingleton<SurveyArchiveParser>();
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyCsvParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyExcelParser>(ServiceLifetime.Singleton);
-        services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyArchiveParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, AgentResponseJsonParser>(ServiceLifetime.Singleton);
 
         services.AddHttpClient("YandexGPT", client =>

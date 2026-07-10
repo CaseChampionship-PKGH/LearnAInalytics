@@ -1,11 +1,9 @@
-﻿using LearnAInalytics.Entities.Models;
-
-namespace LearnAInalytics.Parsing.Contracts.Models;
+﻿namespace LearnAInalytics.Entities.Models;
 
 /// <summary>
-/// Результат парсинга анекты
+/// Полученная анкета
 /// </summary>
-public class SurveyParseResult
+public class Survey
 {
     /// <summary>
     /// Распарсенная программа
