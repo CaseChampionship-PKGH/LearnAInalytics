@@ -131,11 +131,11 @@ public class SurveyAggregator : ICriterionAggregator
                 }
             }
 
-            result.Criteria.Add(promptData);
+            result.AllCriteriaData.Add(promptData);
         }
 
         // 3. Извлечение ExcludedTopics и SuggestedTopics
-        result.ExcludedTopics = FilterDashResponses(ExtractOpenResponses(questions, responses, "исключить из программы"));
+        result.ExcludedTopics = FilterDashResponses(ExtractOpenResponses(questions, responses, "исключить из"));
         result.SuggestedTopics = FilterDashResponses(ExtractOpenResponses(questions, responses, "дополнить программу"));
 
         // 4. Распределение форматов обучения

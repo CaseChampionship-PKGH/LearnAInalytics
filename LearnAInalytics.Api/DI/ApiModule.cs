@@ -49,7 +49,7 @@ public class ApiModule : Module
         services.RegisterAsImplementedInterfaces<SurveyAggregator>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<DefaultPromptProvider>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<LlmFactory>(ServiceLifetime.Singleton);
-        services.RegisterAsImplementedInterfaces<LlmTestAnalysisAgent>(ServiceLifetime.Singleton);
+        services.RegisterAsImplementedInterfaces<LlmSurveyAnalysisAgent>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<LlmReportAgent>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<AgentReportBuilder>(ServiceLifetime.Singleton);
         services.RegisterAutoMapperProfile<SurveyAnalysisApiProfile>();

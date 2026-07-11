@@ -1,5 +1,4 @@
 ﻿using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
-using LearnAInalytics.Reporting.Contracts.Models;
 
 namespace LearnAInalytics.Agent.Contracts.Interfaces;
 
@@ -9,12 +8,12 @@ namespace LearnAInalytics.Agent.Contracts.Interfaces;
 public interface IPromptProvider
 {
     /// <summary>
-    /// Преобразовать данные одного вопроса в промпт анализа
+    /// Формирует промпт для получения примечания по критерию
     /// </summary>
-    string BuildBatchAnalysisPrompt(AggregatedCriteriaData aggregatedCriteriaData);
+    string BuildCriterionNotePrompt(CriterionPromptData criterionData);
 
     /// <summary>
-    /// Преобразовать данные одного вопроса в промпт создания отчёта
+    /// Формирует промпт для генерации раздела "Траектория изменения программы"
     /// </summary>
-    string BuildReportGeneratingPrompt(Summary summary, List<string> criticalIssues, List<QuestionReport> questions);
+    string BuildTrajectoryPrompt(AggregatedCriteriaData allData, List<string> notes);
 }

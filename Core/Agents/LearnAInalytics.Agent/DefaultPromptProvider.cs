@@ -1,78 +1,139 @@
-﻿using LearnAInalytics.Agent.Contracts.Interfaces;
+﻿using System.Text;
+using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
-using LearnAInalytics.Reporting.Contracts.Models;
 
 namespace LearnAInalytics.Agent;
 
-/// <summary>
 /// <inheritdoc cref="IPromptProvider"/>
-/// </summary>
 public class DefaultPromptProvider : IPromptProvider
 {
-    string IPromptProvider.BuildBatchAnalysisPrompt(AggregatedCriteriaData aggregatedCriteriaData)
+    string IPromptProvider.BuildCriterionNotePrompt(CriterionPromptData criterionData)
     {
-        //var sb = new StringBuilder();
+        var sb = new StringBuilder();
+        sb.AppendLine("Ты — аналитик образовательных программ.");
+        sb.AppendLine($"Проанализируй ответы слушателей по критерию «{criterionData.CriterionName}».");
+        sb.AppendLine();
 
-        //sb.AppendLine("Ты — эксперт по проверке тестовых заданий.");
-        //sb.AppendLine("Дан вопрос, эталонный ответ и список ответов тестируемых.");
-        //sb.AppendLine("Для каждого тестируемого определи:");
-        //sb.AppendLine("- процент совпадения с эталоном (0-100)");
-        //sb.AppendLine("- вердикт: correct / partial / incorrect");
-        //sb.AppendLine("- краткое обоснование (1 предложение на русском)");
-        //sb.AppendLine();
-        //sb.AppendLine($"Вопрос: {batch.Question.QuestionText}");
-        //sb.AppendLine($"Тип вопроса: {batch.Question.Type}");
-        //sb.AppendLine($"Правильный ответ: {batch.Question.CorrectAnswer}");
-        //sb.AppendLine("Ответы тестируемых:");
+        // Статистика
+        var stats = criterionData.Statistics;
+        if (stats != null)
+        {
+            if (stats.Average.HasValue)
+            {
+                sb.AppendLine($"Статистика: средний балл — {stats.Average:F1} из 10.");
+                if (stats.Distribution != null)
+                {
+                    sb.AppendLine($"Распределение оценок: 1-3: {stats.PercentLow:F1}%, " +
+                                  $"4-7: {stats.PercentMedium:F1}%, " +
+                                  $"8-10: {stats.PercentHigh:F1}%.");
+                }
+            }
+            else if (stats.YesCount.HasValue)
+            {
+                sb.AppendLine($"Статистика: \"Да\" — {stats.YesCount} чел. ({stats.YesPercent:F1}%), " +
+                              $"\"Нет\" — {stats.NoCount} чел. ({stats.NoPercent:F1}%).");
+            }
+        }
 
-        //foreach (var answer in batch.Answers)
-        //{
-        //    sb.AppendLine($"{answer.UserId}: \"{answer.RawAnswer}\"");
-        //}
+        // Ответы на вопросы
+        sb.AppendLine();
+        sb.AppendLine("Ответы на вопросы:");
+        foreach (var qa in criterionData.Questions)
+        {
+            if (qa.Answers.Count == 0)
+            {
+                continue;
+            }
 
-        //sb.AppendLine();
-        //sb.AppendLine("Верни ТОЛЬКО JSON без markdown-обёртки, без пояснений:");
-        //sb.AppendLine("{");
-        //sb.AppendLine("  \"results\": [");
-        //sb.AppendLine("    { \"userId\": \"user_001\", \"similarityPercent\": 85, \"verdict\": \"correct\", \"comment\": \"...\" },");
-        //sb.AppendLine("    ...");
-        //sb.AppendLine("  ]");
-        //sb.AppendLine("}");
+            sb.AppendLine($"Вопрос: «{qa.Question.QuestionText}»");
+            foreach (var ans in qa.Answers)
+            {
+                sb.AppendLine($"- «{ans}»");
+            }
 
-        //return sb.ToString();
+            sb.AppendLine();
+        }
 
-        return string.Empty;
+        sb.AppendLine("На основе этих данных напиши Примечание на 3-8 предложений деловым стилем. " +
+                      "Указывай точные цифры. Не придумывай факты, опирайся только на предоставленные ответы.");
+        return sb.ToString();
     }
 
-    string IPromptProvider.BuildReportGeneratingPrompt(Summary summary, List<string> criticalIssues, List<QuestionReport> questions)
+
+    string IPromptProvider.BuildTrajectoryPrompt(AggregatedCriteriaData allData, List<string> notes)
     {
-        //var sb = new StringBuilder();
-        //sb.AppendLine("Ты — методист, анализирующий результаты тестирования.");
-        //sb.AppendLine("Ниже представлена статистика ответов на тестовые задания.");
-        //sb.AppendLine($"Всего вопросов: {summary.TotalQuestions}, тестируемых: {summary.TotalUsers}.");
-        //sb.AppendLine($"Средний процент правильных ответов: {summary.OverallCorrectPercentage}%.");
-        //sb.AppendLine($"Критические вопросы (правильных ответов < {SurveyAnalysisConstants.PassGradePercent}%):");
-        //foreach (var issue in criticalIssues)
-        //{
-        //    sb.AppendLine("- " + issue);
-        //}
-        //sb.AppendLine("Самые частые проблемы по вопросам:");
-        //foreach (var q in questions.Where(q => q.CommonMistakes.Any()))
-        //{
-        //    sb.AppendLine($"Вопрос: {Truncate(q.QuestionText, 100)}");
-        //    foreach (var m in q.CommonMistakes)
-        //    {
-        //        sb.AppendLine($"  - {m}");
-        //    }
-        //}
-        //sb.AppendLine("На основе этих данных напиши рекомендации по улучшению тестовых заданий (3-5 предложений).");
-        //sb.AppendLine("Укажи, какие вопросы стоит пересмотреть, на что обратить внимание.");
-        //return sb.ToString();
+        var sb = new StringBuilder();
+        sb.AppendLine("Ты — методист образовательных программ.");
+        sb.AppendLine("Составь раздел «Траектория изменения программы» на основе следующих данных:");
+        sb.AppendLine();
 
-        return string.Empty;
+        var criterionNames = new[] { "Полезность", "Практико-ориентированность", "Доступность", "Взаимодействие с КУ", "Вовлеченность" };
+        for (var i = 0; i < criterionNames.Length && i < notes.Count; i++)
+        {
+            sb.AppendLine($"Примечание по критерию «{criterionNames[i]}»: {notes[i]}");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("Сводная статистика:");
+        foreach (var c in allData.AllCriteriaData)
+        {
+            var s = c.Statistics;
+            if (s == null)
+            {
+                continue;
+            }
+
+            if (s.Average.HasValue)
+            {
+                sb.AppendLine($"- {c.CriterionName}: средний балл {s.Average:F1}");
+            }
+            else if (s.YesCount.HasValue)
+            {
+                sb.AppendLine($"- {c.CriterionName}: Да — {s.YesCount}, Нет — {s.NoCount} ({s.YesPercent:F1}%)");
+            }
+        }
+
+        if (allData.ExcludedTopics.Count > 0)
+        {
+            sb.AppendLine("Предложения исключить темы:");
+            foreach (var t in allData.ExcludedTopics)
+            {
+                sb.AppendLine($"- {t}");
+            }
+        }
+        if (allData.SuggestedTopics.Count > 0)
+        {
+            sb.AppendLine("Предложения добавить темы:");
+            foreach (var t in allData.SuggestedTopics)
+            {
+                sb.AppendLine($"- {t}");
+            }
+        }
+
+        var dist = allData.FormatDistribution;
+        var total = dist.FullTime + dist.Mixed + dist.Remote;
+        sb.AppendLine($"Предпочтения по форме обучения: очно — {dist.FullTime} чел. ({(total > 0 ? 100.0 * dist.FullTime / total : 0):F1}%), " +
+                      $"смешанно — {dist.Mixed} чел. ({(total > 0 ? 100.0 * dist.Mixed / total : 0):F1}%), " +
+                      $"дистанционно — {dist.Remote} чел. ({(total > 0 ? 100.0 * dist.Remote / total : 0):F1}%).");
+
+        sb.AppendLine();
+        sb.AppendLine("Сформулируй раздел, состоящий из пунктов:");
+        sb.AppendLine("1. Потребность в дальнейшей реализации программы (используй средний балл полезности).");
+        sb.AppendLine("2. Корректировка отбора слушателей.");
+        sb.AppendLine("3. Дополнение программы учебными вопросами.");
+        sb.AppendLine("4. Изменение количества часов в программе.");
+        sb.AppendLine("5. Изменение формы обучения (проанализируй распределение).");
+        sb.AppendLine("Каждый пункт — 1-2 предложения деловым стилем, без вводных слов. " +
+                      "Если по пункту нет оснований для изменений, пиши: \"Не требуется\" или \"Нет необходимости\".");
+        sb.AppendLine("Верни ответ строго в формате JSON:");
+        sb.AppendLine("{");
+        sb.AppendLine("  \"needForProgram\": \"...\",");
+        sb.AppendLine("  \"admissionCorrection\": \"...\",");
+        sb.AppendLine("  \"programSupplement\": \"...\",");
+        sb.AppendLine("  \"hoursChange\": \"...\",");
+        sb.AppendLine("  \"formChange\": \"...\"");
+        sb.AppendLine("}");
+        return sb.ToString();
     }
-
-    private static string? Truncate(string? value, int maxLength) =>
-        value == null ? null : value.Length <= maxLength ? value : value[..maxLength];
 }
 

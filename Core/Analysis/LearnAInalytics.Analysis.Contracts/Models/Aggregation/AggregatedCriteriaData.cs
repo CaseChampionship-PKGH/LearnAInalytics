@@ -8,7 +8,7 @@ public class AggregatedCriteriaData
     /// <summary>
     /// Данные для промптов по каждому из 5 критериев
     /// </summary>
-    public List<CriterionPromptData> Criteria { get; set; } = [];
+    public List<CriterionPromptData> AllCriteriaData { get; set; } = [];
 
     /// <summary>
     /// Темы, предложенные к исключению (на основе вопроса "Какие темы можно исключить")

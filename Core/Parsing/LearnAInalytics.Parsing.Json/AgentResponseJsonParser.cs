@@ -1,14 +1,12 @@
 ﻿using System.Text.Json;
-using LearnAInalytics.Agent.Contracts.Models;
+using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Exceptions;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
 
 namespace LearnAInalytics.Parsing.Json;
 
-/// <summary>
 /// <inheritdoc cref="IDataParser"/> для ответов агента
-/// </summary>
 public class AgentResponseJsonParser : IDataParser
 {
     private readonly static JsonSerializerOptions serializerOptions = new()
@@ -25,10 +23,10 @@ public class AgentResponseJsonParser : IDataParser
 
     async Task<T> IDataParser.ParseAsync<T>(Stream input, string fileName)
     {
-        if (typeof(T) != typeof(AgentBatchResponse))
+        if (typeof(T) != typeof(Trajectory))
         {
             throw new ParsingException(
-                $"Парсер AgentResponse не поддерживает тип {typeof(T).Name}. Ожидался AgentBatchResponse.");
+                $"Парсер AgentResponse не поддерживает тип {typeof(T).Name}. Ожидался Trajectory.");
         }
 
         if (input == null || input.Length == 0)
@@ -49,14 +47,11 @@ public class AgentResponseJsonParser : IDataParser
 
         try
         {
-            var response = JsonSerializer.Deserialize<AgentBatchResponse>(rawJson, serializerOptions);
+            var response = JsonSerializer.Deserialize<Trajectory>(rawJson, serializerOptions);
 
-            if (response == null || response.Results == null)
-            {
-                throw new ParsingException("Десериализованный ответ агента равен null или не содержит результатов.");
-            }
-
-            return (T)(object)response;
+            return response == null
+                ? throw new ParsingException("Десериализованный ответ агента равен null или не содержит результатов.")
+                : (T)(object)response;
         }
         catch (JsonException ex)
         {

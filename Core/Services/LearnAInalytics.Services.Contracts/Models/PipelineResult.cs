@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
+﻿using LearnAInalytics.Analysis.Contracts.Models;
 
 namespace LearnAInalytics.Services.Contracts.Models;
 
@@ -17,13 +17,13 @@ public record PipelineResult
     ///// </summary>
     //public byte[] ExcelReport { get; set; } = null!;
 
-    ///// <summary>
-    ///// Список возникших в процессе анализа ошибок
-    ///// </summary>
-    //public List<string> Errors { get; set; } = null!;
+    /// <summary>
+    /// Список возникших в процессе валидации ошибок
+    /// </summary>
+    public List<string> Errors { get; set; } = null!;
 
     /// <summary>
     /// Статистика
     /// </summary>
-    public AggregatedCriteriaData SurveyStatistics { get; set; } = null!;
+    public AnalysisResult AnalysisResult { get; set; } = null!;
 }

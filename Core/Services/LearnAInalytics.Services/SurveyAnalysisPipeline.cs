@@ -1,5 +1,8 @@
-﻿using LearnAInalytics.Agent.Contracts.Interfaces;
+﻿using LearnAInalytics.Agent.Contracts.Enums;
+using LearnAInalytics.Agent.Contracts.Interfaces;
+using LearnAInalytics.Analysis.Contracts.Enums;
 using LearnAInalytics.Analysis.Contracts.Interfaces;
+using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
@@ -21,7 +24,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     private readonly IDataValidator dataValidator;
     private readonly IStatisticsCalculator statisticsCalculator;
     private readonly ICriterionAggregator criterionAggregator;
-    private readonly ITestAnalysisAgent testAnalysisAgent;
+    private readonly ISurveyCriteriaAnalysisAgent surveyCriteriaAnalysisAgent;
     private readonly IReportBuilder reportBuilder;
     private readonly IReportExporter reportExporter;
 
@@ -33,7 +36,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         IDataValidator dataValidator,
         IStatisticsCalculator statisticsCalculator,
         ICriterionAggregator criterionAggregator,
-        ITestAnalysisAgent testAnalysisAgent,
+        ISurveyCriteriaAnalysisAgent surveyCriteriaAnalysisAgent,
         IReportBuilder reportBuilder,
         IReportExporter reportExporter)
     {
@@ -42,7 +45,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         this.dataValidator = dataValidator;
         this.statisticsCalculator = statisticsCalculator;
         this.criterionAggregator = criterionAggregator;
-        this.testAnalysisAgent = testAnalysisAgent;
+        this.surveyCriteriaAnalysisAgent = surveyCriteriaAnalysisAgent;
         this.reportBuilder = reportBuilder;
         this.reportExporter = reportExporter;
     }
@@ -58,6 +61,38 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         var statistics = statisticsCalculator.Calculate(validationResult.ValidatedResults);
         var aggregationResult = criterionAggregator.Aggregate(validationResult.ValidatedResults, statistics);
+
+        var criterionAnalysisList = new List<CriterionAnalysis>();
+
+        foreach (var promptData in aggregationResult.AllCriteriaData)
+        {
+            var note = await surveyCriteriaAnalysisAgent.AnalyzeCriterionAsync(promptData, context.AnalysisMethod == AnalysisMethod.RussianAiAgent
+                    ? LlmVariant.Russian
+                    : LlmVariant.Foreign);
+
+            criterionAnalysisList.Add(new CriterionAnalysis
+            {
+                CriterionName = promptData.CriterionName,
+                PromptData = promptData,
+                Note = note
+            });
+        }
+
+        var trajectory = await surveyCriteriaAnalysisAgent.AnalyzeTrajectoryAsync(aggregationResult,
+            criterionAnalysisList.Select(x => x.Note ?? string.Empty).ToList(),
+            context.AnalysisMethod == AnalysisMethod.RussianAiAgent
+                    ? LlmVariant.Russian
+                    : LlmVariant.Foreign);
+
+        var result = new AnalysisResult()
+        {
+            ProgramInfo = surveyParseResult.ProgramInfo,
+            AllCriteriaAnalysisData = criterionAnalysisList,
+            SuggestedTopics = aggregationResult.SuggestedTopics,
+            ExcludedTopics = aggregationResult.ExcludedTopics,
+            FormatDistribution = aggregationResult.FormatDistribution,
+            Trajectory = trajectory
+        };
 
         //var batches = batchBuilder.Build(validationResult);
 
@@ -112,10 +147,10 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         return new PipelineResult()
         {
-            SurveyStatistics = aggregationResult,
+            AnalysisResult = result,
+            Errors = validationResult.Warnings.ToList(),
             //ReportData = reportData,
             //ExcelReport = excelBytes,
-            //Errors = validationResult.Warnings.ToList(),
         };
     }
 
