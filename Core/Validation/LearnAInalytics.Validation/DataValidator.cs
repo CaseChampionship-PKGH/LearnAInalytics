@@ -1,6 +1,6 @@
 ﻿using LearnAInalytics.Entities.Enums;
 using LearnAInalytics.Entities.Models;
-using LearnAInalytics.Services.Contracts.Constants;
+using LearnAInalytics.Services.Contracts.Helpers;
 using LearnAInalytics.Validation.Contracts.Interfaces;
 using LearnAInalytics.Validation.Contracts.Models;
 
@@ -57,7 +57,7 @@ public class DataValidator : IDataValidator
                         }
                         if (!IsValidBinary(binVal))
                         {
-                            if (IsDashEquivalent(binVal))
+                            if (AnswerQuality.IsNonInformative(binVal))
                             {
                                 warnings.Add($"Бинарный ответ '{binVal}' для вопроса '{question.QuestionText}' интерпретирован как пустой.");
                                 continue;
@@ -70,7 +70,7 @@ public class DataValidator : IDataValidator
 
                     case QuestionType.OpenText:
                         var text = answer.TextValue;
-                        if (string.IsNullOrWhiteSpace(text) || IsDashEquivalent(text!))
+                        if (string.IsNullOrWhiteSpace(text) || AnswerQuality.IsNonInformative(text!))
                         {
                             continue;
                         }
@@ -118,11 +118,9 @@ public class DataValidator : IDataValidator
         };
     }
 
-    private bool IsValidBinary(string value)
+    private static bool IsValidBinary(string value)
     {
         return value.Equals("да", StringComparison.OrdinalIgnoreCase) ||
                value.Equals("нет", StringComparison.OrdinalIgnoreCase);
     }
-
-    private bool IsDashEquivalent(string text) => text.StartsWith('-') || text.StartsWith('_') || SurveyAnalysisConstants.DashEquivalents.Contains(text);
 }

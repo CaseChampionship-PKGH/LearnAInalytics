@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Entities.Enums;
+﻿using LearnAInalytics.Entities.Models;
 
 namespace LearnAInalytics.Analysis.Contracts.Models;
 
@@ -8,19 +8,9 @@ namespace LearnAInalytics.Analysis.Contracts.Models;
 public class QuestionStatistics
 {
     /// <summary>
-    /// Идентификатор попроса
+    /// Связанный вопрос с статистикой
     /// </summary>
-    public string QuestionId { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Текст вопроса
-    /// </summary>
-    public string QuestionText { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Тип вопроса
-    /// </summary>
-    public QuestionType Type { get; set; }
+    public SurveyQuestion Question { get; set; } = null!;
 
     // Для Numeric
 

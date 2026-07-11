@@ -37,9 +37,7 @@ public class StatisticsCalculator : IStatisticsCalculator
 
             var qStats = new QuestionStatistics
             {
-                QuestionId = question.QuestionId,
-                QuestionText = question.QuestionText,
-                Type = question.Type
+                Question = question,
             };
 
             switch (question.Type)
@@ -50,7 +48,7 @@ public class StatisticsCalculator : IStatisticsCalculator
                         .Select(a => a.NumericValue!.Value)
                         .ToList();
 
-                    if (numericValues.Any())
+                    if (numericValues.Count != 0)
                     {
                         qStats.Average = numericValues.Average();
                         qStats.Median = CalculateMedian(numericValues);
@@ -96,6 +94,61 @@ public class StatisticsCalculator : IStatisticsCalculator
 
         return stats;
     }
+
+    QuestionStatistics? IStatisticsCalculator.CalculateForQuestion(SurveyQuestion question, IEnumerable<SurveyResponse> responses)
+    {
+        if (question == null || responses == null)
+        {
+            return null;
+        }
+
+        var allAnswers = responses.SelectMany(r => r.Answers)
+                                  .Where(a => a.QuestionId == question.QuestionId)
+                                  .ToList();
+
+        var stat = new QuestionStatistics
+        {
+            Question = question,
+        };
+
+        switch (question.Type)
+        {
+            case QuestionType.Numeric:
+                var scores = allAnswers.Where(a => a.NumericValue.HasValue)
+                                       .Select(a => a.NumericValue!.Value)
+                                       .ToList();
+                stat.AnswerCount = scores.Count;
+                if (scores.Count > 0)
+                {
+                    stat.Average = scores.Average();
+                    stat.StandardDeviation = CalculateStdDev(scores, stat.Average.Value);
+                    stat.Median = CalculateMedian(scores);
+                    stat.Distribution = scores
+                            .GroupBy(v => (int)Math.Round(v))
+                            .ToDictionary(g => g.Key, g => g.Count());
+                }
+                break;
+
+            case QuestionType.Binary:
+                var yes = allAnswers.Count(a => a.BinaryValue?.Trim().ToLower() == "да");
+                var no = allAnswers.Count(a => a.BinaryValue?.Trim().ToLower() == "нет");
+                stat.YesCount = yes;
+                stat.NoCount = no;
+                stat.AnswerCount = yes + no;
+                if (stat.AnswerCount > 0)
+                {
+                    stat.YesPercent = 100.0 * yes / stat.AnswerCount;
+                    stat.NoPercent = 100.0 * no / stat.AnswerCount;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return stat;
+    }
+
 
     private static double CalculateMedian(List<double> values)
     {

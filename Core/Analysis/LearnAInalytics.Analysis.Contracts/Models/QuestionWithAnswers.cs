@@ -1,4 +1,6 @@
-﻿namespace LearnAInalytics.Analysis.Contracts.Models;
+﻿using LearnAInalytics.Entities.Models;
+
+namespace LearnAInalytics.Analysis.Contracts.Models;
 
 /// <summary>
 /// Сжатое представление открытых ответов на вопрос для анализа
@@ -8,7 +10,7 @@ public record QuestionWithAnswers
     /// <summary>
     /// Вопрос
     /// </summary>
-    public string QuestionText { get; set; } = null!;
+    public SurveyQuestion Question { get; set; } = null!;
 
     /// <summary>
     /// Ответы

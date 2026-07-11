@@ -12,4 +12,9 @@ public interface IStatisticsCalculator
     /// Посчитать данные анекеты
     /// </summary>
     SurveyStatistics Calculate(Survey parsedData);
+
+    /// <summary>
+    /// Посчитать данные одного вопроса
+    /// </summary>
+    QuestionStatistics? CalculateForQuestion(SurveyQuestion question, IEnumerable<SurveyResponse> responses);
 }

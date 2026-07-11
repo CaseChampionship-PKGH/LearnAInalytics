@@ -5,17 +5,28 @@ using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
 using LearnAInalytics.Entities.Enums;
 using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Services.Contracts.Constants;
+using LearnAInalytics.Services.Contracts.Helpers;
 
 namespace LearnAInalytics.Analysis;
 
 /// <inheritdoc cref="ICriterionAggregator"/>
 public class SurveyAggregator : ICriterionAggregator
 {
-    AggregatedCriteriaData ICriterionAggregator.Aggregate(Survey parsedResult, SurveyStatistics statistics)
+    private readonly IStatisticsCalculator calculator;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="SurveyAggregator"/>
+    /// </summary>
+    public SurveyAggregator(IStatisticsCalculator calculator)
+    {
+        this.calculator = calculator;
+    }
+
+    AggregatedCriteriaData ICriterionAggregator.Aggregate(Survey survey, SurveyStatistics statistics)
     {
         var result = new AggregatedCriteriaData();
-        var questions = parsedResult.Questions;
-        var responses = parsedResult.Responses;
+        var questions = survey.Questions;
+        var responses = survey.Responses;
 
         // 1. Сопоставление вопросов критериям с учётом уточняющих
         var questionCriterionMap = new Dictionary<string, string>(); // QuestionId -> CriterionName
@@ -23,6 +34,11 @@ public class SurveyAggregator : ICriterionAggregator
 
         foreach (var q in questions)
         {
+            if (q.QuestionText.Contains("формат обучения", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             var criterion = DetermineCriterion(q.QuestionText);
             if (criterion == null)
             {
@@ -45,24 +61,28 @@ public class SurveyAggregator : ICriterionAggregator
         }
 
         // 2. Формирование данных по каждому критерию
-        var criterionNames = new[] { "Полезность", "Практико-ориентированность", "Доступность", "Взаимодействие с КУ", "Вовлеченность" };
-        foreach (var name in criterionNames)
+        foreach (var name in SurveyAnalysisConstants.CriteriaNames)
         {
-            var promptData = new CriterionPromptData
-            {
-                CriterionName = name,
-                Statistics = statistics.Questions.FirstOrDefault(s => QuestionBelongsToCriterion(s.QuestionId, name))
-                              ?? new QuestionStatistics()
-            };
-
             // Находим все вопросы этого критерия
             var criterionQuestions = questions
                 .Where(q => questionCriterionMap.TryGetValue(q.QuestionId, out var c) && c == name)
                 .ToList();
 
+            var statQuestion = FindMainStatQuestion(criterionQuestions, name);
+            var criterionStat = statQuestion != null
+                ? calculator.CalculateForQuestion(statQuestion, responses)
+                : null;
+
+            var promptData = new CriterionPromptData
+            {
+                CriterionName = name,
+                Statistics = criterionStat ?? new QuestionStatistics()
+            };
+
             foreach (var q in criterionQuestions)
             {
-                var questionWithAnswers = new QuestionWithAnswers { QuestionText = q.QuestionText };
+                var questionWithAnswers = new QuestionWithAnswers { Question = q };
+
                 // Собираем ответы
                 foreach (var response in responses)
                 {
@@ -105,20 +125,38 @@ public class SurveyAggregator : ICriterionAggregator
                     }
                 }
 
-                promptData.Questions.Add(questionWithAnswers);
+                if (questionWithAnswers.Answers.Count > 0)
+                {
+                    promptData.Questions.Add(questionWithAnswers);
+                }
             }
 
             result.Criteria.Add(promptData);
         }
 
         // 3. Извлечение ExcludedTopics и SuggestedTopics
-        result.ExcludedTopics = ExtractOpenResponses(questions, responses, "исключить из программы");
-        result.SuggestedTopics = ExtractOpenResponses(questions, responses, "дополнить программу");
+        result.ExcludedTopics = FilterDashResponses(ExtractOpenResponses(questions, responses, "исключить из программы"));
+        result.SuggestedTopics = FilterDashResponses(ExtractOpenResponses(questions, responses, "дополнить программу"));
 
         // 4. Распределение форматов обучения
         result.FormatDistribution = ExtractFormatDistribution(questions, responses);
 
         return result;
+    }
+
+    private static SurveyQuestion? FindMainStatQuestion(List<SurveyQuestion> questions, string criterionName)
+    {
+        // Для критериев полезность, практика, доступность, взаимодействие – ищем числовой вопрос
+        if (criterionName != "Вовлеченность в образовательный процесс")
+        {
+            return questions.FirstOrDefault(q => q.Type == QuestionType.Numeric);
+        }
+        else
+        {
+            // Для вовлечённости – бинарный вопрос об отстранённости
+            return questions.FirstOrDefault(q => q.Type == QuestionType.Binary &&
+                q.QuestionText.Contains("отстраненность"));
+        }
     }
 
     private static string? DetermineCriterion(string questionText)
@@ -131,14 +169,6 @@ public class SurveyAggregator : ICriterionAggregator
             }
         }
         return null; // уточняющий или не идентифицирован
-    }
-
-    private static bool QuestionBelongsToCriterion(string questionId, string criterionName)
-    {
-        // Используется для поиска статистики – здесь можно полагаться на маппинг,
-        // но для простоты будем проверять через текст вопроса (повторный вызов DetermineCriterion)
-        // В реальном коде лучше передавать маппинг
-        return false; // Заглушка – заменим внутри основного метода
     }
 
     private static SurveyQuestion? FindParentBinaryQuestion(List<SurveyQuestion> criterionQuestions, SurveyQuestion clarifying)
@@ -172,11 +202,14 @@ public class SurveyAggregator : ICriterionAggregator
         return targetQuestion == null
             ? []
             : responses
-            .SelectMany(r => r.Answers)
-            .Where(a => a.QuestionId == targetQuestion.QuestionId && !string.IsNullOrWhiteSpace(a.TextValue))
-            .Select(a => a.TextValue!)
-            .ToList();
+                .SelectMany(r => r.Answers)
+                .Where(a => a.QuestionId == targetQuestion.QuestionId && !string.IsNullOrWhiteSpace(a.TextValue))
+                .Select(a => a.TextValue!)
+                .ToList();
     }
+
+    private List<string> FilterDashResponses(List<string> rawList) =>
+        rawList.Where(s => !AnswerQuality.IsNonInformative(s)).ToList();
 
     private static LearningFormatDistribution ExtractFormatDistribution(List<SurveyQuestion> questions, List<SurveyResponse> responses)
     {
