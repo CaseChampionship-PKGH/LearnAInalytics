@@ -16,5 +16,5 @@ public interface IStatisticsCalculator
     /// <summary>
     /// Посчитать данные одного вопроса
     /// </summary>
-    QuestionStatistics? CalculateForQuestion(SurveyQuestion question, IEnumerable<SurveyResponse> responses);
+    QuestionStatistics? CalculateForQuestion(SurveyQuestion? question, IEnumerable<SurveyResponse> responses);
 }

@@ -30,6 +30,12 @@ public class DataValidator : IDataValidator
                     continue;
                 }
 
+                if (answer.TextValue != null && AnswerQuality.IsPotentialInjection(answer.TextValue))
+                {
+                    warnings.Add($"Потенциальный Prompt Injection: '{answer.TextValue}' ответ проигнорен.");
+                    continue;
+                }
+
                 switch (question.Type)
                 {
                     case QuestionType.Numeric:
@@ -69,8 +75,7 @@ public class DataValidator : IDataValidator
                         break;
 
                     case QuestionType.OpenText:
-                        var text = answer.TextValue;
-                        if (string.IsNullOrWhiteSpace(text) || AnswerQuality.IsNonInformative(text!))
+                        if (AnswerQuality.IsNonInformativeForQuestion(question.QuestionText, answer.TextValue))
                         {
                             continue;
                         }

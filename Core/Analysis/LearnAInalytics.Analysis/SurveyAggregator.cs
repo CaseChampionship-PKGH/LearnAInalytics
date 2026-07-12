@@ -69,9 +69,8 @@ public class SurveyAggregator : ICriterionAggregator
                 .ToList();
 
             var statQuestion = FindMainStatQuestion(criterionQuestions, name);
-            var criterionStat = statQuestion != null
-                ? calculator.CalculateForQuestion(statQuestion, responses)
-                : null;
+            var calculatedStatQuestion = statistics.Questions.FirstOrDefault(x => x.Question.QuestionId == statQuestion?.QuestionId);
+            var criterionStat = calculatedStatQuestion ?? calculator.CalculateForQuestion(statQuestion, responses);
 
             var promptData = new CriterionPromptData
             {

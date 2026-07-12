@@ -95,7 +95,7 @@ public class StatisticsCalculator : IStatisticsCalculator
         return stats;
     }
 
-    QuestionStatistics? IStatisticsCalculator.CalculateForQuestion(SurveyQuestion question, IEnumerable<SurveyResponse> responses)
+    QuestionStatistics? IStatisticsCalculator.CalculateForQuestion(SurveyQuestion? question, IEnumerable<SurveyResponse> responses)
     {
         if (question == null || responses == null)
         {

@@ -19,16 +19,6 @@ public class AnalysisResult
     public List<CriterionAnalysis> AllCriteriaAnalysisData { get; set; } = null!;
 
     /// <summary>
-    /// Темы, предложенные к исключению (на основе вопроса "Какие темы можно исключить")
-    /// </summary>
-    public List<string> ExcludedTopics { get; set; } = [];
-
-    /// <summary>
-    /// Темы, предложенные к добавлению (на основе вопроса "Какими темами дополнить")
-    /// </summary>
-    public List<string> SuggestedTopics { get; set; } = [];
-
-    /// <summary>
     /// Предпочтительная форма обучения
     /// </summary>
     public LearningFormatDistribution FormatDistribution { get; set; } = null!;

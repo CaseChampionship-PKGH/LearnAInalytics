@@ -8,14 +8,9 @@ namespace LearnAInalytics.Analysis.Contracts.Models;
 public class CriterionAnalysis
 {
     /// <summary>
-    /// Название критерия
-    /// </summary>
-    public string CriterionName { get; set; } = string.Empty;
-
-    /// <summary>
     /// Исходные данные
     /// </summary>
-    public CriterionPromptData PromptData { get; set; } = null!;
+    public CriterionPromptData CriterionData { get; set; } = null!;
 
     /// <summary>
     /// Сгенерированное примечание

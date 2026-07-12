@@ -49,7 +49,7 @@ public class SurveyCsvParser : IDataParser
         }
 
         var questionIndexes = new Dictionary<int, SurveyQuestion>();
-        for (var i = 4; i < headers.Length; i++)
+        for (var i = 3; i < headers.Length; i++)
         {
             var headerText = headers[i]?.Trim();
             if (string.IsNullOrWhiteSpace(headerText))

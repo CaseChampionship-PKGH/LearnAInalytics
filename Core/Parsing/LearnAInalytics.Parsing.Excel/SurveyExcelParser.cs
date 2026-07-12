@@ -36,7 +36,7 @@ public class SurveyExcelParser : IDataParser
         }
 
         var questionIndexes = new Dictionary<int, SurveyQuestion>();
-        for (var i = 4; i < headers.Count; i++)
+        for (var i = 3; i < headers.Count; i++)
         {
             var headerText = headers[i];
             if (string.IsNullOrWhiteSpace(headerText))
@@ -57,7 +57,6 @@ public class SurveyExcelParser : IDataParser
         var questions = questionIndexes.Values.ToList();
         var responses = new List<SurveyResponse>();
 
-        // Используем LastRowUsed, чтобы не обходить весь лист (1 млн строк)
         var lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
         for (var row = 2; row <= lastRow; row++)
         {

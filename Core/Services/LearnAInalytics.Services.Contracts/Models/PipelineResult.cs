@@ -26,4 +26,14 @@ public record PipelineResult
     /// Статистика
     /// </summary>
     public AnalysisResult AnalysisResult { get; set; } = null!;
+
+    /// <summary>
+    /// промпт анализа
+    /// </summary>
+    public string PromptAnalysis { get; set; } = string.Empty;
+
+    /// <summary>
+    /// промпт тракетории
+    /// </summary>
+    public string PromptTrajectory { get; set; } = string.Empty;
 }

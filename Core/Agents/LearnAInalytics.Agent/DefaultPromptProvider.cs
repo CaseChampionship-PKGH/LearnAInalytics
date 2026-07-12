@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
+using LearnAInalytics.Services.Contracts.Constants;
 
 namespace LearnAInalytics.Agent;
 
@@ -64,16 +65,19 @@ public class DefaultPromptProvider : IPromptProvider
     {
         var sb = new StringBuilder();
         sb.AppendLine("Ты — методист образовательных программ.");
-        sb.AppendLine("Составь раздел «Траектория изменения программы» на основе следующих данных:");
+        sb.AppendLine("Составь раздел «Траектория изменения программы» и краткие обобщения предложений слушателей.");
+        sb.AppendLine("На основе следующих данных:");
         sb.AppendLine();
 
-        var criterionNames = new[] { "Полезность", "Практико-ориентированность", "Доступность", "Взаимодействие с КУ", "Вовлеченность" };
-        for (var i = 0; i < criterionNames.Length && i < notes.Count; i++)
+        // Примечания по критериям
+        var criterianNames = SurveyAnalysisConstants.CriteriaNames;
+        for (var i = 0; i < criterianNames.Length && i < notes.Count; i++)
         {
-            sb.AppendLine($"Примечание по критерию «{criterionNames[i]}»: {notes[i]}");
+            sb.AppendLine($"Примечание по критерию «{criterianNames[i]}»: {notes[i]}");
             sb.AppendLine();
         }
 
+        // Сводная статистика
         sb.AppendLine("Сводная статистика:");
         foreach (var c in allData.AllCriteriaData)
         {
@@ -89,49 +93,63 @@ public class DefaultPromptProvider : IPromptProvider
             }
             else if (s.YesCount.HasValue)
             {
-                sb.AppendLine($"- {c.CriterionName}: Да — {s.YesCount}, Нет — {s.NoCount} ({s.YesPercent:F1}%)");
+                sb.AppendLine($"- {c.CriterionName}, Вопрос - «{s.Question.QuestionText}»: Да — {s.YesCount}, Нет — {s.NoCount} ({s.YesPercent:F1}%)");
             }
         }
 
+        // Сырые предложения по исключению и добавлению тем
         if (allData.ExcludedTopics.Count > 0)
         {
-            sb.AppendLine("Предложения исключить темы:");
+            sb.AppendLine("Предложения исключить темы (сырые ответы):");
             foreach (var t in allData.ExcludedTopics)
             {
                 sb.AppendLine($"- {t}");
             }
         }
+        else
+        {
+            sb.AppendLine("Предложений об исключении тем нет.");
+        }
+
         if (allData.SuggestedTopics.Count > 0)
         {
-            sb.AppendLine("Предложения добавить темы:");
+            sb.AppendLine("Предложения добавить темы (сырые ответы):");
             foreach (var t in allData.SuggestedTopics)
             {
                 sb.AppendLine($"- {t}");
             }
         }
+        else
+        {
+            sb.AppendLine("Предложений о добавлении тем нет.");
+        }
 
+        // Распределение форматов
         var dist = allData.FormatDistribution;
-        var total = dist.FullTime + dist.Mixed + dist.Remote;
+        int total = dist.FullTime + dist.Mixed + dist.Remote;
         sb.AppendLine($"Предпочтения по форме обучения: очно — {dist.FullTime} чел. ({(total > 0 ? 100.0 * dist.FullTime / total : 0):F1}%), " +
                       $"смешанно — {dist.Mixed} чел. ({(total > 0 ? 100.0 * dist.Mixed / total : 0):F1}%), " +
                       $"дистанционно — {dist.Remote} чел. ({(total > 0 ? 100.0 * dist.Remote / total : 0):F1}%).");
 
         sb.AppendLine();
-        sb.AppendLine("Сформулируй раздел, состоящий из пунктов:");
-        sb.AppendLine("1. Потребность в дальнейшей реализации программы (используй средний балл полезности).");
-        sb.AppendLine("2. Корректировка отбора слушателей.");
-        sb.AppendLine("3. Дополнение программы учебными вопросами.");
-        sb.AppendLine("4. Изменение количества часов в программе.");
-        sb.AppendLine("5. Изменение формы обучения (проанализируй распределение).");
-        sb.AppendLine("Каждый пункт — 1-2 предложения деловым стилем, без вводных слов. " +
-                      "Если по пункту нет оснований для изменений, пиши: \"Не требуется\" или \"Нет необходимости\".");
-        sb.AppendLine("Верни ответ строго в формате JSON:");
+        sb.AppendLine("Сформируй JSON-ответ со следующими полями:");
+        sb.AppendLine("1. needForProgram — потребность в дальнейшей реализации программы (1-2 предложения).");
+        sb.AppendLine("2. admissionCorrection — нужна ли корректировка отбора слушателей (1 предложение).");
+        sb.AppendLine("3. programSupplement — что нужно добавить в программу (1-2 предложения).");
+        sb.AppendLine("4. hoursChange — нужно ли изменение количества часов (1 предложение).");
+        sb.AppendLine("5. formChange — нужно ли изменение формы обучения (1 предложение, учитывая распределение).");
+        sb.AppendLine("6. excludedTopicsSummary — обобщение предложений об исключении тем: 1-2 предложения, сгруппировав похожие.");
+        sb.AppendLine("7. suggestedTopicsSummary — обобщение предложений о добавлении тем: 1-2 предложения, сгруппировав похожие.");
+        sb.AppendLine();
+        sb.AppendLine("Верни строго JSON без markdown:");
         sb.AppendLine("{");
         sb.AppendLine("  \"needForProgram\": \"...\",");
         sb.AppendLine("  \"admissionCorrection\": \"...\",");
         sb.AppendLine("  \"programSupplement\": \"...\",");
         sb.AppendLine("  \"hoursChange\": \"...\",");
-        sb.AppendLine("  \"formChange\": \"...\"");
+        sb.AppendLine("  \"formChange\": \"...\",");
+        sb.AppendLine("  \"excludedTopicsSummary\": \"...\",");
+        sb.AppendLine("  \"suggestedTopicsSummary\": \"...\"");
         sb.AppendLine("}");
         return sb.ToString();
     }

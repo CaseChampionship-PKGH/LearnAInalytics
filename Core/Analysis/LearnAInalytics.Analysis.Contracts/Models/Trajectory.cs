@@ -29,4 +29,14 @@ public class Trajectory
     /// Изменение формы обучения
     /// </summary>
     public string FormChange { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Изложение по анализу исключённых тем
+    /// </summary>
+    public string ExcludedTopicsSummary { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Изложение по анализу дополнений тем
+    /// </summary>
+    public string SuggestedTopicsSummary { get; set; } = string.Empty;
 }

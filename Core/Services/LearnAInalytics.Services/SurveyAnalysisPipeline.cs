@@ -1,6 +1,4 @@
-﻿using LearnAInalytics.Agent.Contracts.Enums;
-using LearnAInalytics.Agent.Contracts.Interfaces;
-using LearnAInalytics.Analysis.Contracts.Enums;
+﻿using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Entities.Models;
@@ -25,6 +23,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     private readonly IStatisticsCalculator statisticsCalculator;
     private readonly ICriterionAggregator criterionAggregator;
     private readonly ISurveyCriteriaAnalysisAgent surveyCriteriaAnalysisAgent;
+    private readonly IPromptProvider promptProvider;
     private readonly IReportBuilder reportBuilder;
     private readonly IReportExporter reportExporter;
 
@@ -37,6 +36,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         IStatisticsCalculator statisticsCalculator,
         ICriterionAggregator criterionAggregator,
         ISurveyCriteriaAnalysisAgent surveyCriteriaAnalysisAgent,
+        IPromptProvider promptProvider,
         IReportBuilder reportBuilder,
         IReportExporter reportExporter)
     {
@@ -46,6 +46,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         this.statisticsCalculator = statisticsCalculator;
         this.criterionAggregator = criterionAggregator;
         this.surveyCriteriaAnalysisAgent = surveyCriteriaAnalysisAgent;
+        this.promptProvider = promptProvider;
         this.reportBuilder = reportBuilder;
         this.reportExporter = reportExporter;
     }
@@ -66,30 +67,31 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         foreach (var promptData in aggregationResult.AllCriteriaData)
         {
-            var note = await surveyCriteriaAnalysisAgent.AnalyzeCriterionAsync(promptData, context.AnalysisMethod == AnalysisMethod.RussianAiAgent
-                    ? LlmVariant.Russian
-                    : LlmVariant.Foreign);
+            //var note = await surveyCriteriaAnalysisAgent.AnalyzeCriterionAsync(promptData, context.AnalysisMethod == AnalysisMethod.RussianAiAgent
+            //        ? LlmVariant.Russian
+            //        : LlmVariant.Foreign);
+
+            var note = "placeholder";
 
             criterionAnalysisList.Add(new CriterionAnalysis
             {
-                CriterionName = promptData.CriterionName,
-                PromptData = promptData,
+                CriterionData = promptData,
                 Note = note
             });
         }
 
-        var trajectory = await surveyCriteriaAnalysisAgent.AnalyzeTrajectoryAsync(aggregationResult,
-            criterionAnalysisList.Select(x => x.Note ?? string.Empty).ToList(),
-            context.AnalysisMethod == AnalysisMethod.RussianAiAgent
-                    ? LlmVariant.Russian
-                    : LlmVariant.Foreign);
+        //var trajectory = await surveyCriteriaAnalysisAgent.AnalyzeTrajectoryAsync(aggregationResult,
+        //    criterionAnalysisList.Select(x => x.Note ?? string.Empty).ToList(),
+        //    context.AnalysisMethod == AnalysisMethod.RussianAiAgent
+        //            ? LlmVariant.Russian
+        //            : LlmVariant.Foreign);
+
+        Trajectory? trajectory = null;
 
         var result = new AnalysisResult()
         {
             ProgramInfo = surveyParseResult.ProgramInfo,
             AllCriteriaAnalysisData = criterionAnalysisList,
-            SuggestedTopics = aggregationResult.SuggestedTopics,
-            ExcludedTopics = aggregationResult.ExcludedTopics,
             FormatDistribution = aggregationResult.FormatDistribution,
             Trajectory = trajectory
         };
@@ -149,6 +151,8 @@ public class SurveyAnalysisPipeline : IPipelineService
         {
             AnalysisResult = result,
             Errors = validationResult.Warnings.ToList(),
+            PromptAnalysis = promptProvider.BuildCriterionNotePrompt(aggregationResult.AllCriteriaData.First()),
+            PromptTrajectory = promptProvider.BuildTrajectoryPrompt(aggregationResult, [])
             //ReportData = reportData,
             //ExcelReport = excelBytes,
         };
