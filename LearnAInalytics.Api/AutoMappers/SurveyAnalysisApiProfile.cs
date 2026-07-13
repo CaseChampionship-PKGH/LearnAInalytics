@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Api.Models;
-using LearnAInalytics.Reporting.Contracts.Models;
 
 namespace LearnAInalytics.Api.AutoMappers;
 
@@ -12,8 +12,6 @@ public class SurveyAnalysisApiProfile : Profile
     /// </summary>
     public SurveyAnalysisApiProfile()
     {
-        CreateMap<ReportDataApiModel, ReportData>(MemberList.Source).ReverseMap();
-        CreateMap<SummaryApiModel, Summary>(MemberList.Source).ReverseMap();
-        CreateMap<QuestionReportApiModel, QuestionReport>(MemberList.Source).ReverseMap();
+        CreateMap<AnalysisResultApiModel, AnalysisResult>(MemberList.Source).ReverseMap();
     }
 }

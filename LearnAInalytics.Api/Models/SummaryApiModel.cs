@@ -1,32 +1,31 @@
-﻿namespace LearnAInalytics.Api.Models;
+﻿using LearnAInalytics.Analysis.Contracts.Models;
+using LearnAInalytics.Analysis.Contracts.Models.Aggregation;
+using LearnAInalytics.Entities.Models;
+
+namespace LearnAInalytics.Api.Models;
 
 /// <summary>
-/// Сводная статистика по всем вопросам.
+/// Api модель резульата анализа
 /// </summary>
-public class SummaryApiModel
+public class AnalysisResultApiModel
 {
     /// <summary>
-    /// Общее количество уникальных вопросов в тесте.
+    /// Метаданные программы полученные из SurveyParseResult
     /// </summary>
-    public int TotalQuestions { get; set; }
+    public ProgramInfo ProgramInfo { get; set; } = null!;
 
     /// <summary>
-    /// Общее количество тестируемых, чьи ответы анализировались.
+    /// Результат анализа с генерацией итогового примечания для каждого критерия программы
     /// </summary>
-    public int TotalUsers { get; set; }
+    public List<CriterionAnalysis> AllCriteriaAnalysisData { get; set; } = null!;
 
     /// <summary>
-    /// Средний процент полностью правильных ответов (correct).
+    /// Предпочтительная форма обучения
     /// </summary>
-    public double OverallCorrectPercentage { get; set; }
+    public LearningFormatDistribution FormatDistribution { get; set; } = null!;
 
     /// <summary>
-    /// Средний процент частично правильных ответов (partial).
+    /// Траектория изменения программы по результатам итогового опроса слушателей
     /// </summary>
-    public double OverallPartialPercentage { get; set; }
-
-    /// <summary>
-    /// Средний процент неправильных ответов (incorrect).
-    /// </summary>
-    public double OverallIncorrectPercentage { get; set; }
+    public Trajectory? Trajectory { get; set; }
 }

@@ -1,103 +1,103 @@
 ﻿using ClosedXML.Excel;
+using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Reporting.Contracts.Interfaces;
 using LearnAInalytics.Reporting.Contracts.Models;
+using LearnAInalytics.Services.Contracts.Constants;
 
 namespace LearnAInalytics.Reporting;
 
 /// <inheritdoc cref="IReportExporter"/>
 public class ExcelReportExporter : IReportExporter
 {
-    byte[] IReportExporter.ExportToExcel(ReportData report)
+    private readonly static string[] headers = SurveyAnalysisConstants.CriteriaNames.Concat(["Общая оценка удовлетворённости"]).ToArray();
+
+    ExportType IReportExporter.ExportType => ExportType.Excel;
+
+    byte[] IReportExporter.Export(AnalysisResult analysisResult)
     {
         using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("Анализ тестов");
+        var ws = workbook.Worksheets.Add("Анализ программы");
 
-        var titleCell = ws.Cell(1, 1);
-        titleCell.Value = "Отчёт анализа тестовых заданий";
-        titleCell.Style.Font.Bold = true;
-        titleCell.Style.Font.FontSize = 14;
-        ws.Range(1, 1, 1, 6).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-        ws.Row(1).Height = 30;
-
-        ws.Cell(3, 1).Value = "Сводная статистика";
-        ws.Cell(3, 1).Style.Font.Bold = true;
-        ws.Cell(4, 1).Value = "Всего вопросов";
-        ws.Cell(4, 2).Value = report.Summary.TotalQuestions;
-        ws.Cell(5, 1).Value = "Всего тестируемых";
-        ws.Cell(5, 2).Value = report.Summary.TotalUsers;
-        ws.Cell(6, 1).Value = "Ср. % правильных";
-        ws.Cell(6, 2).Value = report.Summary.OverallCorrectPercentage / 100;
-        ws.Cell(6, 2).Style.NumberFormat.Format = "0.00%";
-
-        var startRow = 8;
-        ws.Cell(startRow, 1).Value = "Детализация по вопросам";
-        ws.Cell(startRow, 1).Style.Font.Bold = true;
-        startRow++;
-
-        string[] headers = {
-            "Вопрос", "Правильный ответ", "Тип", "Всего ответов",
-            "Правильных", "Частично", "Неправильных", "% правильных",
-            "Критический", "Пустых", "Ср. совпадение", "Частые ошибки"
-        };
+        ws.Cell(2, 2).Value = "Количественные показатели по программе";
+        ws.Cell(2, 2).Style.Font.Bold = true;
+        ws.Cell(2, 2).Style.Font.FontSize = 11;
+        var headerRange = ws.Range(2, 2, 2, 7).Merge();
+        headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#DEEBF6");
 
         for (var i = 0; i < headers.Length; i++)
         {
-            ws.Cell(startRow, i + 1).Value = headers[i];
-            ws.Cell(startRow, i + 1).Style.Font.Bold = true;
-            ws.Cell(startRow, i + 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+            var cell = ws.Cell(3, i + 2);
+            cell.Value = headers[i];
+            cell.Style.Font.FontSize = 11;
+
+            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#DEEBF6");
+            cell.Style.Alignment.WrapText = true;
         }
 
-        var dataStart = startRow + 1;
-        foreach (var q in report.Questions)
+        var criteria = analysisResult.AllCriteriaAnalysisData;
+        var usefulness = GetAverage(criteria, SurveyAnalysisConstants.Usefulness);
+        var practicality = GetAverage(criteria, SurveyAnalysisConstants.Practicality);
+        var accessibility = GetAverage(criteria, SurveyAnalysisConstants.Accessibility);
+        var engagement = GetEngagementPercent(criteria);
+        var interaction = GetAverage(criteria, SurveyAnalysisConstants.Interaction);
+
+        double? overall = null;
+        if (usefulness.HasValue && practicality.HasValue && accessibility.HasValue && interaction.HasValue && engagement.HasValue)
         {
-            var row = dataStart++;
-            ws.Cell(row, 1).Value = q.QuestionText;
-            ws.Cell(row, 2).Value = q.CorrectAnswer;
-            ws.Cell(row, 3).Value = q.Type;
-            ws.Cell(row, 4).Value = q.TotalAnswers;
-            ws.Cell(row, 5).Value = q.CorrectCount;
-            ws.Cell(row, 6).Value = q.PartialCount;
-            ws.Cell(row, 7).Value = q.IncorrectCount;
-            ws.Cell(row, 8).Value = q.CorrectPercentage / 100;
-            ws.Cell(row, 8).Style.NumberFormat.Format = "0.00%";
-            ws.Cell(row, 9).Value = q.IsCritical ? "Да" : "Нет";
-            ws.Cell(row, 10).Value = q.EmptyCount;
-            ws.Cell(row, 11).Value = q.AverageSimilarityPercent / 100;
-            ws.Cell(row, 11).Style.NumberFormat.Format = "0.00%";
-            ws.Cell(row, 12).Value = string.Join("; ", q.CommonMistakes);
-
-            if (q.IsCritical)
-            {
-                ws.Row(row).Style.Fill.BackgroundColor = XLColor.LightSalmon;
-            }
-
-            if (q.EmptyCount > 0)
-            {
-                ws.Cell(row, 10).Style.Fill.BackgroundColor = XLColor.Yellow;
-            }
+            overall = (usefulness.Value + practicality.Value + accessibility.Value + interaction.Value) / 4.0;
         }
 
-        var issuesRow = dataStart + 1;
-        ws.Cell(issuesRow, 1).Value = "Критические замечания";
-        ws.Cell(issuesRow, 1).Style.Font.Bold = true;
-        issuesRow++;
-        foreach (var issue in report.CriticalIssues)
+        var dataRow = 4;
+        ws.Cell(dataRow, 2).Value = usefulness?.ToString("F2") ?? "—";
+        ws.Cell(dataRow, 3).Value = practicality?.ToString("F2") ?? "—";
+        ws.Cell(dataRow, 4).Value = accessibility?.ToString("F2") ?? "—";
+        ws.Cell(dataRow, 5).Value = engagement.HasValue ? $"{engagement.Value:F2}%" : "—";
+        ws.Cell(dataRow, 6).Value = interaction?.ToString("F2") ?? "—";
+        ws.Cell(dataRow, 7).Value = overall?.ToString("F10") ?? "—";
+
+        var criterianCells = ws.Range(dataRow - 1, 2, dataRow - 1, 7);
+        criterianCells.Style.Font.FontSize = 11;
+        criterianCells.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        criterianCells.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+        var dataCells = ws.Range(dataRow, 2, dataRow, 7);
+        dataCells.Style.Font.FontSize = 11;
+        dataCells.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        dataCells.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+        var tableRange = ws.Range(2, 2, dataRow, 7);
+        tableRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        tableRange.Style.Border.OutsideBorderColor = XLColor.Black;
+        tableRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        tableRange.Style.Border.InsideBorderColor = XLColor.Black;
+
+        tableRange.Style.Alignment.WrapText = true;
+
+        for (var col = 2; col <= 7; col++)
         {
-            ws.Cell(issuesRow++, 1).Value = issue;
-            ws.Cell(issuesRow - 1, 1).Style.Fill.BackgroundColor = XLColor.OrangeRed;
+            ws.Column(col).Width = 25;
         }
 
-        var recRow = issuesRow + 1;
-        ws.Cell(recRow, 1).Value = "Рекомендации";
-        ws.Cell(recRow, 1).Style.Font.Bold = true;
-        ws.Cell(recRow + 1, 1).Value = report.Recommendations;
-        ws.Range(recRow + 1, 1, recRow + 1, 6).Merge();
-        ws.Cell(recRow + 1, 1).Style.Alignment.WrapText = true;
-
-        ws.Columns().AdjustToContents();
+        ws.Row(2).Height = 25;
+        ws.Row(3).Height = 50;
+        ws.Row(4).Height = 50;
 
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         return stream.ToArray();
+    }
+
+    private static double? GetAverage(List<CriterionAnalysis> criteria, string criterionName)
+    {
+        var c = criteria.FirstOrDefault(x => x.CriterionData.CriterionName == criterionName);
+        return c?.CriterionData.Statistics?.Average;
+    }
+
+    private static double? GetEngagementPercent(List<CriterionAnalysis> criteria)
+    {
+        var c = criteria.FirstOrDefault(x => x.CriterionData.CriterionName == SurveyAnalysisConstants.Engagement);
+        return c?.CriterionData.Statistics?.NoPercent;
     }
 }

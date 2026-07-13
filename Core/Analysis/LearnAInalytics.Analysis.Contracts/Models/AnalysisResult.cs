@@ -27,5 +27,4 @@ public class AnalysisResult
     /// Траектория изменения программы по результатам итогового опроса слушателей
     /// </summary>
     public Trajectory? Trajectory { get; set; }
-
 }

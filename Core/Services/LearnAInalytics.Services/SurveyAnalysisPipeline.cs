@@ -23,9 +23,7 @@ public class SurveyAnalysisPipeline : IPipelineService
     private readonly IStatisticsCalculator statisticsCalculator;
     private readonly ICriterionAggregator criterionAggregator;
     private readonly ISurveyCriteriaAnalysisAgent surveyCriteriaAnalysisAgent;
-    private readonly IPromptProvider promptProvider;
-    private readonly IReportBuilder reportBuilder;
-    private readonly IReportExporter reportExporter;
+    private readonly IReportExporterFactory reportExporterFactory;
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="SurveyAnalysisPipeline"/>
@@ -36,9 +34,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         IStatisticsCalculator statisticsCalculator,
         ICriterionAggregator criterionAggregator,
         ISurveyCriteriaAnalysisAgent surveyCriteriaAnalysisAgent,
-        IPromptProvider promptProvider,
-        IReportBuilder reportBuilder,
-        IReportExporter reportExporter)
+        IReportExporterFactory reportExporterFactory)
     {
         this.formatDetector = formatDetector;
         this.parserFactory = parserFactory;
@@ -46,9 +42,7 @@ public class SurveyAnalysisPipeline : IPipelineService
         this.statisticsCalculator = statisticsCalculator;
         this.criterionAggregator = criterionAggregator;
         this.surveyCriteriaAnalysisAgent = surveyCriteriaAnalysisAgent;
-        this.promptProvider = promptProvider;
-        this.reportBuilder = reportBuilder;
-        this.reportExporter = reportExporter;
+        this.reportExporterFactory = reportExporterFactory;
     }
 
     async Task<PipelineResult> IPipelineService.RunAsync(PipelineContext context)
@@ -147,22 +141,24 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         //reportData.ParsedUsers = parsedUserAnswers;
 
+        var reportExporter = reportExporterFactory.GetReportExporter(ExportType.Excel);
+        var excelBytes = reportExporter.Export(result);
+
         return new PipelineResult()
         {
             AnalysisResult = result,
             Errors = validationResult.Warnings.ToList(),
-            PromptAnalysis = promptProvider.BuildCriterionNotePrompt(aggregationResult.AllCriteriaData.First()),
-            PromptTrajectory = promptProvider.BuildTrajectoryPrompt(aggregationResult, [])
+            ExcelBytes = excelBytes,
             //ReportData = reportData,
             //ExcelReport = excelBytes,
             //Errors = validationResult.Warnings.ToList(),
         };
     }
 
-    async Task<byte[]> IPipelineService.ExportReportExcel(ReportData reportData)
+    async Task<byte[]> IPipelineService.ExportReportExcel(AnalysisResult result)
     {
-        //var excelBytes = reportExporter.ExportToExcel(reportData);
-        //return excelBytes;
-        return [];
+        var reportExporter = reportExporterFactory.GetReportExporter(ExportType.Excel);
+        var excelBytes = reportExporter.Export(result);
+        return excelBytes;
     }
 }

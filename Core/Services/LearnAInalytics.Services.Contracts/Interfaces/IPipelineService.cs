@@ -1,4 +1,4 @@
-﻿using LearnAInalytics.Reporting.Contracts.Models;
+﻿using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Models;
 
 namespace LearnAInalytics.Services.Contracts.Interfaces;
@@ -16,5 +16,5 @@ public interface IPipelineService
     /// <summary>
     /// Экспортировать отчёт в Excel
     /// </summary>
-    Task<byte[]> ExportReportExcel(ReportData reportData);
+    Task<byte[]> ExportReportExcel(AnalysisResult analysisResult);
 }
