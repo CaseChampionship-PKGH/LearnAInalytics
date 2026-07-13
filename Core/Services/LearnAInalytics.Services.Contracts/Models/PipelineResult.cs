@@ -7,16 +7,6 @@ namespace LearnAInalytics.Services.Contracts.Models;
 /// </summary>
 public record PipelineResult
 {
-    ///// <summary>
-    ///// Отчёт
-    ///// </summary>
-    //public ReportData ReportData { get; set; } = null!;
-
-    ///// <summary>
-    ///// Результат анализа
-    ///// </summary>
-    //public byte[] ExcelReport { get; set; } = null!;
-
     /// <summary>
     /// Список возникших в процессе валидации ошибок
     /// </summary>
@@ -28,12 +18,7 @@ public record PipelineResult
     public AnalysisResult AnalysisResult { get; set; } = null!;
 
     /// <summary>
-    /// промпт анализа
+    /// Excel
     /// </summary>
-    public string PromptAnalysis { get; set; } = string.Empty;
-
-    /// <summary>
-    /// промпт тракетории
-    /// </summary>
-    public string PromptTrajectory { get; set; } = string.Empty;
+    public byte[] ExcelBytes { get; set; } = null!;
 }

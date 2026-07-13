@@ -1,8 +1,8 @@
 using AutoMapper;
 using LearnAInalytics.Analysis.Contracts.Enums;
+using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Api.Models;
 using LearnAInalytics.Parsing.Contracts.Exceptions;
-using LearnAInalytics.Reporting.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Interfaces;
 using LearnAInalytics.Services.Contracts.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -65,13 +65,13 @@ public class AnalysisController : ControllerBase
     }
 
     /// <summary>
-    /// Экспорт отчёта в Pdf (.pdf)
+    /// Экспорт отчёта в Excel (.excel)
     /// </summary>
     [HttpPost("export/excel")]
-    public async Task<IActionResult> ExportToPDF([FromBody] ReportDataApiModel reportModel)
+    public async Task<IActionResult> ExportToExcel([FromBody] AnalysisResultApiModel analysisResultModel)
     {
-        var domainReport = mapper.Map<ReportData>(reportModel);
-        var excelBytes = await pipeline.ExportReportExcel(domainReport);
+        var analysisResult = mapper.Map<AnalysisResult>(analysisResultModel);
+        var excelBytes = await pipeline.ExportReportExcel(analysisResult);
         return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");
     }
 

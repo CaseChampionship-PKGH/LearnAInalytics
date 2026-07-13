@@ -1,4 +1,5 @@
-﻿using LearnAInalytics.Reporting.Contracts.Models;
+﻿using LearnAInalytics.Analysis.Contracts.Models;
+using LearnAInalytics.Reporting.Contracts.Models;
 
 namespace LearnAInalytics.Reporting.Contracts.Interfaces;
 
@@ -8,7 +9,12 @@ namespace LearnAInalytics.Reporting.Contracts.Interfaces;
 public interface IReportExporter
 {
     /// <summary>
-    /// Экспортировать
+    /// Тип экспортера
     /// </summary>
-    byte[] ExportToExcel(ReportData report);
+    ExportType ExportType { get; }
+
+    /// <summary>
+    /// Экспортировать статистику
+    /// </summary>
+    byte[] Export(AnalysisResult analysisData);
 }
