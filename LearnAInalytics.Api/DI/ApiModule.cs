@@ -51,6 +51,7 @@ public class ApiModule : Module
         services.RegisterAsImplementedInterfaces<LlmFactory>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<LlmSurveyAnalysisAgent>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IReportExporter, ExcelReportExporter>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<IReportExporter, WordReportExporter>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<ReportExporterFactory>(ServiceLifetime.Singleton);
         services.RegisterAutoMapperProfile<SurveyAnalysisApiProfile>();
         RegisterAutoMapper(services);
