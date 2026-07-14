@@ -51,7 +51,7 @@ public class AnalysisController : ControllerBase
         try
         {
             var result = await pipeline.RunAsync(context);
-            //var mappedResult = mapper.Map<ReportDataApiModel>(result.ParsedResult);
+            var mappedResult = mapper.Map<AnalysisResultApiModel>(result.AnalysisResult);
             return Ok(result);
         }
         catch (ParsingException ex)
@@ -70,9 +70,24 @@ public class AnalysisController : ControllerBase
     [HttpPost("export/excel")]
     public async Task<IActionResult> ExportToExcel([FromBody] AnalysisResultApiModel analysisResultModel)
     {
-        var analysisResult = mapper.Map<AnalysisResult>(analysisResultModel);
-        var excelBytes = await pipeline.ExportReportExcel(analysisResult);
-        return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "report.xlsx");
+        var domainResult = mapper.Map<AnalysisResult>(analysisResultModel);
+        var fileBytes = await pipeline.ExportStatsExcel(domainResult);
+        return File(fileBytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"{domainResult.ProgramInfo?.Period + " " ?? "report"}{domainResult.ProgramInfo?.Title ?? string.Empty}.xlsx");
+    }
+
+    /// <summary>
+    /// Экспорт отчёта в Word (.docx)
+    /// </summary>
+    [HttpPost("export/word")]
+    public async Task<IActionResult> ExportToWord([FromBody] AnalysisResultApiModel analysisResultModel)
+    {
+        var domainResult = mapper.Map<AnalysisResult>(analysisResultModel);
+        var fileBytes = await pipeline.ExportReportWord(domainResult);
+        return File(fileBytes,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            $"{domainResult.ProgramInfo?.Period + " " ?? "report"}{domainResult.ProgramInfo?.Title ?? string.Empty}.docx");
     }
 
     /// <summary>

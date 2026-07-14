@@ -14,7 +14,12 @@ public interface IPipelineService
     Task<PipelineResult> RunAsync(PipelineContext context);
 
     /// <summary>
-    /// Экспортировать отчёт в Excel
+    /// Экспортировать статистику в Excel
     /// </summary>
-    Task<byte[]> ExportReportExcel(AnalysisResult analysisResult);
+    Task<byte[]> ExportStatsExcel(AnalysisResult analysisResult);
+
+    /// <summary>
+    /// Экспортировать отчёт в Word
+    /// </summary>
+    Task<byte[]> ExportReportWord(AnalysisResult analysisResult);
 }

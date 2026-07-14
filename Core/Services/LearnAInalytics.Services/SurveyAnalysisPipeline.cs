@@ -65,7 +65,7 @@ public class SurveyAnalysisPipeline : IPipelineService
             //        ? LlmVariant.Russian
             //        : LlmVariant.Foreign);
 
-            var note = "placeholder";
+            var note = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis eros varius, viverra neque et, pretium ligula. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas id blandit sapien. Mauris eu mauris urna. Fusce auctor tellus maximus viverra cursus. In aliquam et augue non fringilla. Vestibulum non congue ex. Proin feugiat leo quis nisl scelerisque pulvinar. Nam consequat quam nec urna congue, sed tristique erat molestie. Pellentesque pharetra neque sit amet tellus vestibulum, a hendrerit nisi fermentum. In lobortis laoreet ornare. Suspendisse eros libero, placerat vitae nulla in, rhoncus blandit nibh. Suspendisse tincidunt pretium enim, efficitur dictum leo iaculis vel. Nam eget ante nibh. Etiam mauris erat, aliquet vel mauris ac, ullamcorper imperdiet massa. Duis dolor nisl, ultricies vitae lorem id, eleifend egestas sem.\r\n\r\nNulla facilisi. Praesent eget ultricies enim. Ut non lobortis massa, vitae imperdiet dui. Fusce sed bibendum dolor. Morbi ac orci in est consectetur placerat nec ac dui. Aenean ultrices mi sit amet sapien vehicula, eu semper nisl iaculis. Morbi eu risus quis nisl sodales euismod at in libero. Cras ut malesuada libero. Aliquam erat volutpat. Donec ornare placerat metus, sollicitudin semper mi imperdiet et. Nam ac risus sit amet justo tempor eleifend. Cras eget varius felis.\r\n\r\nDonec aliquet ex non felis consequat, ut facilisis lorem pulvinar. Nunc at nisl vitae elit tincidunt faucibus. Duis arcu ex, vestibulum et erat quis, sollicitudin luctus magna. Aliquam fermentum tincidunt risus, eget vestibulum neque euismod in. Nam vitae eros id elit lacinia ultrices. Curabitur ut blandit tellus. Sed elementum feugiat sem. Integer dui tellus, cursus quis efficitur eget, faucibus eu sem. Fusce et suscipit risus. Praesent sollicitudin vel ex et dictum. Nunc vitae volutpat sapien. Fusce vestibulum arcu diam, ac vehicula enim luctus in. Suspendisse potenti. Donec ut eros quam.\r\n\r\n";
 
             criterionAnalysisList.Add(new CriterionAnalysis
             {
@@ -80,7 +80,16 @@ public class SurveyAnalysisPipeline : IPipelineService
         //            ? LlmVariant.Russian
         //            : LlmVariant.Foreign);
 
-        Trajectory? trajectory = null;
+        var trajectory = new Trajectory()
+        {
+            SuggestedTopicsSummary = "Nulla facilisi. Praesent eget ultricies enim. Ut non lobortis massa, vitae imperdiet dui. Fusce sed bibendum dolor. Morbi ac orci in est consectetur placerat nec ac dui. Aenean ultrices mi sit amet sapien vehicula, eu semper nisl iaculis. Morbi eu risus quis nisl sodales euismod at in libero. Cras ut malesuada libero. Aliquam erat volutpat. Donec ornare placerat metus, sollicitudin semper mi imperdiet et. Nam ac risus sit amet justo tempor eleifend. Cras eget varius felis.\r\n\r\n",
+            ExcludedTopicsSummary = "Vivamus posuere quam neque. Ut diam eros, luctus eu ligula eu, pellentesque convallis libero. Mauris dignissim ex arcu, nec gravida velit pellentesque id. Nunc a magna sit amet nunc venenatis viverra id in dui. Fusce vitae efficitur felis, et eleifend purus. Duis et odio odio. Duis ac magna consequat, tristique risus eu, tincidunt urna. ",
+            ProgramSupplement = "Pellentesque scelerisque neque nulla, nec volutpat justo vehicula mattis. Vivamus porttitor purus bibendum odio maximus, id facilisis mi suscipit. Etiam ultrices convallis metus, id iaculis magna scelerisque eget. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ac sapien ligula. Sed ut porttitor sem. ",
+            FormChange = "Нет необходимости",
+            NeedForProgram = "Нет необходимости",
+            HoursChange = "Нет необходимости",
+            AdmissionCorrection = "Нет необходимости",
+        };
 
         var result = new AnalysisResult()
         {
@@ -141,23 +150,27 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         //reportData.ParsedUsers = parsedUserAnswers;
 
-        var reportExporter = reportExporterFactory.GetReportExporter(ExportType.Excel);
-        var excelBytes = reportExporter.Export(result);
-
         return new PipelineResult()
         {
             AnalysisResult = result,
             Errors = validationResult.Warnings.ToList(),
-            ExcelBytes = excelBytes,
             //ReportData = reportData,
             //ExcelReport = excelBytes,
             //Errors = validationResult.Warnings.ToList(),
         };
     }
 
-    async Task<byte[]> IPipelineService.ExportReportExcel(AnalysisResult result)
+    async Task<byte[]> IPipelineService.ExportStatsExcel(AnalysisResult result)
     {
         var reportExporter = reportExporterFactory.GetReportExporter(ExportType.Excel);
+        var excelBytes = reportExporter.Export(result);
+        return excelBytes;
+    }
+
+
+    async Task<byte[]> IPipelineService.ExportReportWord(AnalysisResult result)
+    {
+        var reportExporter = reportExporterFactory.GetReportExporter(ExportType.Word);
         var excelBytes = reportExporter.Export(result);
         return excelBytes;
     }
