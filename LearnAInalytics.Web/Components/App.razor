@@ -16,18 +16,125 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 	<script>
-		window.downloadFileFromStream = async (streamRef, fileName) => {
-			const arrayBuffer = await streamRef.arrayBuffer();
-			const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = fileName;
-			a.click();
-			URL.revokeObjectURL(url);
-		}
+		window.charts = {};
+
+    window.renderBarChart = (labels, data) => {
+        const ctx = document.getElementById('barChart').getContext('2d');
+        if (window.charts.bar) window.charts.bar.destroy();
+        window.charts.bar = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Средний балл',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, max: 10 } }
+            }
+        });
+    };
+
+    window.renderRadarChart = (labels, data) => {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if (window.charts.radar) window.charts.radar.destroy();
+        window.charts.radar = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Профиль удовлетворённости',
+                    data: data,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)'
+                }]
+            },
+            options: {
+                scales: { r: { min: 0, max: 10 } }
+            }
+        });
+    };
+
+    window.renderHeatMap = (labels, matrix) => {
+        const canvas = document.getElementById('heatMap');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        // Уничтожаем предыдущий кастомный график (если нужно)
+        if (canvas.chart) canvas.chart.destroy();
+
+        const size = Math.min(500, canvas.parentElement.clientWidth);
+        canvas.width = size + 100; // добавим место для осей
+        canvas.height = size + 100;
+        const n = labels.length;
+        const cellSize = size / n;
+        const fontSize = Math.max(10, cellSize / 5);
+        const offsetX = 60, offsetY = 40; // отступы для подписей
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = `${fontSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                const val = matrix[i][j];
+                let r, g, b;
+                if (val >= 0) {
+                    r = Math.round(255 * val);
+                    g = Math.round(255 * (1 - val));
+                    b = Math.round(255 * (1 - val));
+                } else {
+                    const abs = Math.abs(val);
+                    r = Math.round(255 * (1 - abs));
+                    g = Math.round(255 * (1 - abs));
+                    b = Math.round(255 * abs);
+                }
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fillRect(offsetX + j * cellSize, offsetY + i * cellSize, cellSize, cellSize);
+                ctx.fillStyle = 'black';
+                ctx.fillText(val.toFixed(2), offsetX + j * cellSize + cellSize / 2, offsetY + i * cellSize + cellSize / 2);
+            }
+        }
+
+        // Подписи строк (критерии по вертикали)
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'right';
+        for (let i = 0; i < n; i++) {
+            ctx.fillText(labels[i], offsetX - 5, offsetY + i * cellSize + cellSize / 2);
+        }
+        // Подписи столбцов (повёрнутые)
+        ctx.save();
+        ctx.translate(offsetX, offsetY - 10);
+        ctx.textAlign = 'left';
+        ctx.rotate(-Math.PI / 4);
+        for (let j = 0; j < n; j++) {
+            ctx.fillText(labels[j], j * cellSize + cellSize / 2, 0);
+        }
+        ctx.restore();
+    };
+
+    window.renderDistributionChart = (counts) => {
+        const ctx = document.getElementById('distChart').getContext('2d');
+        if (window.charts.dist) window.charts.dist.destroy();
+        window.charts.dist = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1-3 (низкая)', '4-7 (средняя)', '8-10 (высокая)'],
+                datasets: [{
+                    label: 'Процент ответов',
+                    data: counts,
+                    backgroundColor: ['#FFC107', '#FF9800', '#4CAF50']
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, title: { display: true, text: '%' } } }
+            }
+        });
+    };
 	</script>
 </body>
-
 </html>

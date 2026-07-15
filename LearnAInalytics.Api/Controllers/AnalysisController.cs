@@ -52,7 +52,7 @@ public class AnalysisController : ControllerBase
         {
             var result = await pipeline.RunAsync(context);
             var mappedResult = mapper.Map<AnalysisResultApiModel>(result.AnalysisResult);
-            return Ok(result);
+            return Ok(mappedResult);
         }
         catch (ParsingException ex)
         {

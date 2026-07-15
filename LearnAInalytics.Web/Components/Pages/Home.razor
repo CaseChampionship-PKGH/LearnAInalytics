@@ -3,15 +3,16 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 @using LearnAInalytics.Api.Models
-@using System.Text
+@using LearnAInalytics.Web.Models
+@using LearnAInalytics.Services.Contracts.Constants
 
-<PageTitle>Анализ тестов</PageTitle>
+<PageTitle>Анализ анкет</PageTitle>
 
 <div class="container mt-5">
 	<div class="row justify-content-center">
-		<div class="col-lg-7 col-md-10">
-			<h1 class="display-5 mb-3">Анализ результатов тестов</h1>
-			<p class="lead text-muted">Загрузите ответы и получите интеллектуальный отчёт с рекомендациями.</p>
+		<div class="col-lg-12 col-md-10">
+			<h1 class="display-5 mb-3">Анализ анкет</h1>
+			<p class="lead text-muted">Загрузите ответы и получите интеллектуальный отчёт с визулизации.</p>
 
 			<div class="card mb-4">
 				<div class="card-body p-4">
@@ -19,23 +20,12 @@
 
 					<div class="mb-3">
 						<label class="form-label fw-bold">
-							Файл с ответами тестируемых <span class="text-danger">*</span>
+							Файл с ответами слушателей <span class="text-danger">*</span>
 						</label>
-						<InputFile OnChange="HandleUserFile" class="form-control" accept=".json,.csv,.zip" />
-						@if (userFile != null)
+						<InputFile OnChange="HandleSurveyFile" class="form-control" accept=".xlsx,.csv" />
+						@if (surveyFile != null)
 						{
-							<small class="text-success mt-1 d-block">@userFile.Name</small>
-						}
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label fw-bold">
-							Файл с эталонными ответами
-						</label>
-						<InputFile OnChange="HandleRefFile" class="form-control" accept=".json,.csv,.zip" />
-						@if (refFile != null)
-						{
-							<small class="text-success mt-1 d-block">@refFile.Name</small>
+							<small class="text-success mt-1 d-block">@surveyFile.Name</small>
 						}
 					</div>
 
@@ -79,90 +69,86 @@
 				</div>
 			}
 
-			@if (analysisResult != null)
+			@if (dashboardData != null)
 			{
-				<div class="card card-result mb-4">
-					<div class="card-header bg-success">
-						Результаты анализа
+				<div class="card mt-4">
+					<div class="card-header bg-primary text-white">
+						<h5>Результаты анализа</h5>
 					</div>
-					<div class="card-body p-4">
-						<div class="row g-4">
-							<div class="col-sm-6">
-								<div class="p-3 rounded" style="background-color: #f0f9f5;">
-									<div class="fs-4 fw-bold">@analysisResult.Summary.TotalQuestions</div>
-									<small class="text-muted">Всего вопросов</small>
-								</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-6 mb-4">
+								<canvas id="barChart"></canvas>
 							</div>
-							<div class="col-sm-6">
-								<div class="p-3 rounded" style="background-color: #fff8e7;">
-									<div class="fs-4 fw-bold">@analysisResult.Summary.TotalUsers</div>
-									<small class="text-muted">Тестируемых</small>
-								</div>
+							<div class="col-md-6 mb-4">
+								<canvas id="radarChart"></canvas>
 							</div>
-							<div class="col-sm-6">
-								<div class="p-3 rounded" style="background-color: #f3e8ff;">
-									<div class="fs-4 fw-bold">@analysisResult.Summary.OverallCorrectPercentage.ToString("F1")%</div>
-									<small class="text-muted">Правильных ответов</small>
-								</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 mb-4">
+								<canvas id="heatMap" style="max-width:100%;"></canvas>
 							</div>
-							<div class="col-sm-6">
-								<div class="p-3 rounded" style="background-color: #ffeaea;">
-									<div class="fs-4 fw-bold">@analysisResult.CriticalIssues.Count</div>
-									<small class="text-muted">Критических вопросов</small>
+						</div>
+						<div class="row align-items-center">
+							<div class="col-md-6 mb-3">
+								<canvas id="distChart"></canvas>
+							</div>
+							<div class="col-md-6">
+								<div class="card bg-light p-3">
+									<h4>Общая удовлетворённость</h4>
+									<div class="display-4 text-success fw-bold">@dashboardData.OverallSatisfaction.ToString("F1")</div>
+									<small>из 10</small>
 								</div>
 							</div>
 						</div>
-
-						<div class="d-flex gap-3 mt-4">
-							<button class="btn btn-success" @onclick="DownloadExcel">
-								Скачать Excel
-							</button>
-							<button class="btn btn-outline-primary" @onclick="DownloadJson">
-								Скачать JSON
-							</button>
-						</div>
+					</div>
+					<div class="card-footer d-flex gap-3">
+						<button class="btn btn-success" @onclick="DownloadExcel">
+							Скачать Excel
+						</button>
+						<button class="btn btn-outline-primary" @onclick="DownloadWord">
+							Скачать Word
+						</button>
 					</div>
 				</div>
-
-				@if (analysisResult.CriticalIssues.Any())
-				{
-					<div class="card card-result border-danger">
-						<div class="card-header bg-danger">
-							Критические вопросы
-						</div>
-						<div class="card-body">
-							<ul class="list-group list-group-flush">
-								@foreach (var issue in analysisResult.CriticalIssues)
-								{
-									<li class="list-group-item border-0">@issue</li>
-								}
-							</ul>
-						</div>
-					</div>
-				}
 			}
 		</div>
 	</div>
 </div>
 
 @code {
-	private IBrowserFile? userFile;
-	private IBrowserFile? refFile;
+	private IBrowserFile? surveyFile;
 	private string selectedVariant = "foreign";
 	private bool isLoading;
 	private string? errorMessage;
-	private ReportDataApiModel? analysisResult;
-	private string? reportDataJson;
-	private ReportDataApiModel? reportDataObject;
+	private AnalysisResultApiModel? analysisResult;
+	private AnalysisResultApiModel? analysisResultObject;
+	private string? analysisDataJson;
+	private DashboardData? dashboardData;
 
-	private void HandleUserFile(InputFileChangeEventArgs e) => userFile = e.File;
-	private void HandleRefFile(InputFileChangeEventArgs e) => refFile = e.File;
+	private void HandleSurveyFile(InputFileChangeEventArgs e) => surveyFile = e.File;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (dashboardData != null)
+		{
+			await RenderCharts();
+		}
+	}
+
+	private async Task RenderCharts()
+	{
+		await JS.InvokeVoidAsync("renderBarChart", dashboardData!.CriteriaLabels, dashboardData.AverageScores.Values.ToArray());
+		await JS.InvokeVoidAsync("renderRadarChart", dashboardData.CriteriaLabels, dashboardData.SpiderValues.Values.ToArray());
+		await JS.InvokeVoidAsync("renderHeatMap", dashboardData.CriteriaLabels, dashboardData.HeatMapData);
+		await JS.InvokeVoidAsync("renderDistributionChart", dashboardData.DistributionCounts);
+	}
 
 	private async Task StartAnalysis()
 	{
-		if (userFile == null)
+		if (surveyFile == null)
 		{
-			errorMessage = "Не выбран файл с ответами тестируемых.";
+			errorMessage = "Не выбран файл с анкетой";
 			return;
 		}
 
@@ -175,16 +161,9 @@
 		{
 			using var formData = new MultipartFormDataContent();
 
-			var userFileContent = new StreamContent(userFile.OpenReadStream(maxAllowedSize: 100_000_000));
-			userFileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(userFile.ContentType ?? "application/octet-stream");
-			formData.Add(userFileContent, "userAnswers", userFile.Name);
-
-			if (refFile != null)
-			{
-				var refFileContent = new StreamContent(refFile.OpenReadStream(maxAllowedSize: 100_000_000));
-				refFileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(refFile.ContentType ?? "application/octet-stream");
-				formData.Add(refFileContent, "referenceAnswers", refFile.Name);
-			}
+			var userFileContent = new StreamContent(surveyFile.OpenReadStream(maxAllowedSize: 100_000_000));
+			userFileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(surveyFile.ContentType ?? "application/octet-stream");
+			formData.Add(userFileContent, "userAnswers", surveyFile.Name);
 
 			var analysisMethodString = selectedVariant == "russian" ? "RussianAiAgent" : "ForeignAiAgent";
 			var requestUri = $"api/analysis/run?analysisMethod={analysisMethodString}";
@@ -192,12 +171,23 @@
 
 			if (response.IsSuccessStatusCode)
 			{
-				reportDataJson = await response.Content.ReadAsStringAsync();
-				reportDataObject = System.Text.Json.JsonSerializer.Deserialize<ReportDataApiModel>(
-					reportDataJson,
-					new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+				analysisDataJson = await response.Content.ReadAsStringAsync();
+				analysisResultObject = System.Text.Json.JsonSerializer.Deserialize<AnalysisResultApiModel>(
+					analysisDataJson,
+					new System.Text.Json.JsonSerializerOptions
+					{
+						PropertyNameCaseInsensitive = true,
+						Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+					});
 
-				analysisResult = reportDataObject;
+				analysisResult = analysisResultObject;
+				PrepareDashboardData(analysisResultObject!);
+				StateHasChanged();
+				await Task.Delay(200); // дождаться рендера
+				await JS.InvokeVoidAsync("renderBarChart", dashboardData!.CriteriaLabels, dashboardData.AverageScores.Values.ToArray());
+				await JS.InvokeVoidAsync("renderRadarChart", dashboardData.CriteriaLabels, dashboardData.SpiderValues.Values.ToArray());
+				await JS.InvokeVoidAsync("renderHeatMap", dashboardData.CriteriaLabels, dashboardData.HeatMapData);
+				await JS.InvokeVoidAsync("renderDistributionChart", dashboardData.DistributionCounts);
 			}
 			else
 			{
@@ -216,19 +206,27 @@
 		}
 	}
 
-	private async Task DownloadJson()
+	private async Task DownloadWord()
 	{
-		if (reportDataJson == null) return;
-		byte[] bytes = Encoding.UTF8.GetBytes(reportDataJson);
-		using var stream = new MemoryStream(bytes);
-		using var streamRef = new DotNetStreamReference(stream);
-		await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, "report.json");
+		if (analysisResultObject == null) return;
+		var response = await Http.PostAsJsonAsync("api/analysis/export/word", analysisResultObject);
+		if (response.IsSuccessStatusCode)
+		{
+			var bytes = await response.Content.ReadAsByteArrayAsync();
+			using var stream = new MemoryStream(bytes);
+			using var streamRef = new DotNetStreamReference(stream);
+			await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, "report.docx");
+		}
+		else
+		{
+			errorMessage = "Не удалось скачать Word-отчёт.";
+		}
 	}
 
 	private async Task DownloadExcel()
 	{
-		if (reportDataObject == null) return;
-		var response = await Http.PostAsJsonAsync("api/analysis/export/excel", reportDataObject);
+		if (analysisResultObject == null) return;
+		var response = await Http.PostAsJsonAsync("api/analysis/export/excel", analysisResultObject);
 		if (response.IsSuccessStatusCode)
 		{
 			var bytes = await response.Content.ReadAsByteArrayAsync();
@@ -240,5 +238,108 @@
 		{
 			errorMessage = "Не удалось скачать Excel-отчёт.";
 		}
+	}
+
+	private void PrepareDashboardData(AnalysisResultApiModel result)
+	{
+		var criteria = result.AllCriteriaAnalysisData;
+		var avgScores = new Dictionary<string, double>();
+		var spider = new Dictionary<string, double>();
+
+		foreach (var c in criteria)
+		{
+			double val = c.CriterionData.Statistics?.Average ?? 0;
+			if (c.CriterionData.CriterionName == SurveyAnalysisConstants.Engagement)
+			{
+				val = c.CriterionData.Statistics?.NoPercent / 10 ?? 0;
+			}
+			avgScores[c.CriterionData.CriterionName] = val;
+			spider[c.CriterionData.CriterionName] = val;
+		}
+
+		double[][] heatMap = CalculateCorrelationMatrix(SurveyAnalysisConstants.CriteriaNames, result);
+
+		// Распределение общей оценки (по всем числовым критериям)
+		int low = 0, med = 0, high = 0;
+		foreach (var crit in criteria.Where(c => c.CriterionData.Statistics?.Distribution != null))
+		{
+			var dist = crit.CriterionData.Statistics.Distribution;
+			low = Convert.ToInt32(crit.CriterionData.Statistics.PercentLow * 100);
+			med = Convert.ToInt32(crit.CriterionData.Statistics.PercentMedium * 100);
+			high = Convert.ToInt32(crit.CriterionData.Statistics.PercentHigh * 100);
+		}
+
+		dashboardData = new DashboardData
+		{
+			AverageScores = avgScores,
+			SpiderValues = spider,
+			HeatMapData = heatMap,
+			CriteriaLabels = SurveyAnalysisConstants.CriteriaNames,
+			DistributionCounts = new[] { low, med, high },
+			OverallSatisfaction = Math.Round(avgScores.Values.Average(), 1)
+		};
+	}
+
+	private double[][] CalculateCorrelationMatrix(string[] labels, AnalysisResultApiModel result)
+	{
+		// Формируем словарь: название критерия -> список оценок (восстановленных из Distribution)
+		var data = new Dictionary<string, List<double>>();
+		foreach (var c in result.AllCriteriaAnalysisData)
+		{
+			var stats = c.CriterionData?.Statistics;
+			if (stats == null) continue;
+
+			if (stats.Average.HasValue && stats.Distribution != null && stats.Distribution.Count > 0)
+			{
+				// Восстанавливаем вектор оценок
+				var scores = new List<double>();
+				foreach (var kv in stats.Distribution)
+					for (int i = 0; i < kv.Value; i++)
+						scores.Add(kv.Key);
+				data[c.CriterionData!.CriterionName] = scores;
+			}
+			else if (c.CriterionData!.CriterionName == SurveyAnalysisConstants.Engagement)
+			{
+				// Для вовлечённости кодируем 1 = "Да", 0 = "Нет"
+				var engScores = new List<double>();
+				int yes = stats.YesCount ?? 0;
+				int no = stats.NoCount ?? 0;
+				for (int i = 0; i < yes; i++) engScores.Add(1);
+				for (int i = 0; i < no; i++) engScores.Add(0);
+				data[c.CriterionData.CriterionName] = engScores;
+			}
+		}
+
+		int n = labels.Length;
+		double[][] matrix = new double[n][];
+		for (int i = 0; i < n; i++)
+		{
+			matrix[i] = new double[n];
+			for (int j = 0; j < n; j++)
+			{
+				if (data.ContainsKey(labels[i]) && data.ContainsKey(labels[j]) &&
+					data[labels[i]].Count == data[labels[j]].Count && data[labels[i]].Count > 1)
+				{
+					matrix[i][j] = Math.Round(PearsonCorrelation(data[labels[i]], data[labels[j]]), 2);
+				}
+				else
+				{
+					matrix[i][j] = (i == j) ? 1.0 : 0.0;
+				}
+			}
+		}
+		return matrix;
+	}
+
+	private double PearsonCorrelation(List<double> x, List<double> y)
+	{
+		int n = x.Count;
+		double sumX = x.Sum(), sumY = y.Sum();
+		double sumX2 = x.Sum(v => v * v), sumY2 = y.Sum(v => v * v);
+		double sumXY = x.Zip(y, (a, b) => a * b).Sum();
+
+		double numerator = n * sumXY - sumX * sumY;
+		double denominator = Math.Sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+		return denominator == 0 ? 0 : numerator / denominator;
 	}
 }

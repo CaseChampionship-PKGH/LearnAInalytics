@@ -85,10 +85,10 @@ public class SurveyAnalysisPipeline : IPipelineService
             SuggestedTopicsSummary = "Nulla facilisi. Praesent eget ultricies enim. Ut non lobortis massa, vitae imperdiet dui. Fusce sed bibendum dolor. Morbi ac orci in est consectetur placerat nec ac dui. Aenean ultrices mi sit amet sapien vehicula, eu semper nisl iaculis. Morbi eu risus quis nisl sodales euismod at in libero. Cras ut malesuada libero. Aliquam erat volutpat. Donec ornare placerat metus, sollicitudin semper mi imperdiet et. Nam ac risus sit amet justo tempor eleifend. Cras eget varius felis.\r\n\r\n",
             ExcludedTopicsSummary = "Vivamus posuere quam neque. Ut diam eros, luctus eu ligula eu, pellentesque convallis libero. Mauris dignissim ex arcu, nec gravida velit pellentesque id. Nunc a magna sit amet nunc venenatis viverra id in dui. Fusce vitae efficitur felis, et eleifend purus. Duis et odio odio. Duis ac magna consequat, tristique risus eu, tincidunt urna. ",
             ProgramSupplement = "Pellentesque scelerisque neque nulla, nec volutpat justo vehicula mattis. Vivamus porttitor purus bibendum odio maximus, id facilisis mi suscipit. Etiam ultrices convallis metus, id iaculis magna scelerisque eget. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ac sapien ligula. Sed ut porttitor sem. ",
-            FormChange = "Нет необходимости",
             NeedForProgram = "Нет необходимости",
             HoursChange = "Нет необходимости",
             AdmissionCorrection = "Нет необходимости",
+            FormChange = "Нет необходимости",
         };
 
         var result = new AnalysisResult()
