@@ -3,12 +3,13 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 @using LearnAInalytics.Api.Models
+@using System.Text.Json;
 @using LearnAInalytics.Web.Models
 @using LearnAInalytics.Services.Contracts.Constants
 
 <PageTitle>Анализ анкет</PageTitle>
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
 	<div class="row justify-content-center">
 		<div class="col-lg-12 col-md-10">
 			<h1 class="display-5 mb-3">Анализ анкет</h1>
@@ -84,30 +85,52 @@
 								<canvas id="radarChart"></canvas>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col-md-12 mb-4">
-								<canvas id="heatMap" style="max-width:100%;"></canvas>
-							</div>
-						</div>
 						<div class="row align-items-center">
-							<div class="col-md-6 mb-3">
+							<div class="mb-3">
 								<canvas id="distChart"></canvas>
 							</div>
-							<div class="col-md-6">
-								<div class="card bg-light p-3">
-									<h4>Общая удовлетворённость</h4>
-									<div class="display-4 text-success fw-bold">@dashboardData.OverallSatisfaction.ToString("F1")</div>
-									<small>из 10</small>
+						</div>
+						<div class="row">
+							<div class="mb-4">
+								<h5 class="text-center">Корреляционная матрица (Тепловая карта)</h5>
+								<div style="overflow-x: auto;">
+									<table style="border-collapse: collapse; margin: auto;">
+										<tr>
+											<th></th>
+											@foreach (var label in dashboardData.CriteriaLabels)
+											{
+												<th style="padding: 5px; font-size: 12px; text-align: center;">@label</th>
+											}
+										</tr>
+										@for (int i = 0; i < dashboardData.HeatMapData.Length; i++)
+										{
+											<tr>
+												<th style="padding: 5px; font-size: 12px; text-align: right;">@dashboardData.CriteriaLabels[i]</th>
+												@for (int j = 0; j < dashboardData.HeatMapData[i].Length; j++)
+												{
+													var val = dashboardData.HeatMapData[i][j];
+													string bgColor = val > 0.7 ? "#4CAF50" : val > 0.3 ? "#FFC107" : "#F44336";
+													<td style="background-color: @bgColor; color: white; text-align: center; padding: 8px; font-weight: bold; border: 1px solid #ddd;">
+														@val.ToString("F2")
+													</td>
+												}
+											</tr>
+										}
+									</table>
 								</div>
 							</div>
 						</div>
+						
 					</div>
 					<div class="card-footer d-flex gap-3">
 						<button class="btn btn-success" @onclick="DownloadExcel">
 							Скачать Excel
 						</button>
-						<button class="btn btn-outline-primary" @onclick="DownloadWord">
+						<button class="btn btn-info" @onclick="DownloadWord">
 							Скачать Word
+						</button>
+						<button class="btn btn-outline-primary" @onclick="DownloadDashboard">
+							Скачать Html dashboard
 						</button>
 					</div>
 				</div>
@@ -213,9 +236,16 @@
 		if (response.IsSuccessStatusCode)
 		{
 			var bytes = await response.Content.ReadAsByteArrayAsync();
-			using var stream = new MemoryStream(bytes);
-			using var streamRef = new DotNetStreamReference(stream);
-			await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, "report.docx");
+			var fileName = "report.docx";
+			if (response.Headers.TryGetValues("X-Filename", out var values))
+			{
+				var encoded = values.FirstOrDefault();
+				if (!string.IsNullOrEmpty(encoded))
+					fileName = Uri.UnescapeDataString(encoded);
+			}
+			var stream = new MemoryStream(bytes);       // без using
+			var streamRef = new DotNetStreamReference(stream);   // оставить leaveOpen = false по умолчанию
+			await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, fileName);
 		}
 		else
 		{
@@ -230,14 +260,69 @@
 		if (response.IsSuccessStatusCode)
 		{
 			var bytes = await response.Content.ReadAsByteArrayAsync();
-			using var stream = new MemoryStream(bytes);
-			using var streamRef = new DotNetStreamReference(stream);
-			await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, "report.xlsx");
+			var fileName = "report.xlsx";
+			if (response.Headers.TryGetValues("X-Filename", out var values))
+			{
+				var encoded = values.FirstOrDefault();
+				if (!string.IsNullOrEmpty(encoded))
+					fileName = Uri.UnescapeDataString(encoded);
+			}
+			var stream = new MemoryStream(bytes);
+			var streamRef = new DotNetStreamReference(stream);
+			await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, fileName);
 		}
 		else
 		{
 			errorMessage = "Не удалось скачать Excel-отчёт.";
 		}
+	}
+
+	private async Task DownloadDashboard()
+	{
+		if (dashboardData == null) return;
+		var html = GenerateDashboardHtml(dashboardData);
+		var bytes = System.Text.Encoding.UTF8.GetBytes(html);
+		using var stream = new MemoryStream(bytes);
+		using var streamRef = new DotNetStreamReference(stream);
+		await JS.InvokeVoidAsync("downloadFileFromStream", streamRef, "dashboard.html");
+	}
+
+	private string GenerateDashboardHtml(DashboardData data)
+	{
+		var sb = new System.Text.StringBuilder();
+		sb.AppendLine("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Дашборд анализа</title>");
+		sb.AppendLine("<script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>");
+		sb.AppendLine("<style>body{font-family:Arial;margin:20px;}.chart-container{width:600px;margin:20px auto;}</style></head><body>");
+		sb.AppendLine("<h1 style='text-align: center;'>Дашборд анализа анкет</h1>");
+
+		// Линейчатая диаграмма
+		sb.AppendLine("<div class='chart-container'><canvas id='barChart'></canvas></div><script>new Chart(document.getElementById('barChart').getContext('2d'),{type:'bar',data:{labels:" + JsonSerializer.Serialize(data.CriteriaLabels) + ",datasets:[{label:'Средний балл',data:" + JsonSerializer.Serialize(data.AverageScores.Values) + ",backgroundColor:['rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)','rgba(75,192,192,0.6)','rgba(153,102,255,0.6)']}]},options:{scales:{y:{beginAtZero:true,max:10}}}});</script>");
+
+		// Лепестковая диаграмма
+		sb.AppendLine("<div class='chart-container'><canvas id='radarChart'></canvas></div><script>new Chart(document.getElementById('radarChart').getContext('2d'),{type:'radar',data:{labels:" + JsonSerializer.Serialize(data.CriteriaLabels) + ",datasets:[{label:'Профиль',data:" + JsonSerializer.Serialize(data.SpiderValues.Values) + ",borderColor:'rgba(75,192,192,1)',backgroundColor:'rgba(75,192,192,0.2)'}]},options:{scales:{r:{min:0,max:10}}}});</script>");
+
+		// Распределение оценок
+		sb.AppendLine("<div class='chart-container'><canvas id='distChart'></canvas></div><script>new Chart(document.getElementById('distChart').getContext('2d'),{type:'bar',data:{labels:['1-3 (низкая)','4-7 (средняя)','8-10 (высокая)'],datasets:[{label:'Процент ответов',data:" + JsonSerializer.Serialize(data.DistributionCounts) + ",backgroundColor:['#FFC107','#FF9800','#4CAF50']}]}});</script>");
+
+		// Тепловая карта – таблица с цветами
+		sb.AppendLine("<div class='chart-container'><h3>Корреляционная матрица</h3><table style='border-collapse:collapse'><tr><th></th>");
+		foreach (var label in data.CriteriaLabels)
+			sb.AppendLine($"<th>{label}</th>");
+		sb.AppendLine("</tr>");
+		for (int i = 0; i < data.HeatMapData.Length; i++)
+		{
+			sb.AppendLine("<tr>");
+			sb.AppendLine($"<th>{data.CriteriaLabels[i]}</th>");
+			for (int j = 0; j < data.HeatMapData[i].Length; j++)
+			{
+				var val = data.HeatMapData[i][j];
+				var color = val > 0.7 ? "#4CAF50" : val > 0.3 ? "#FFC107" : "#F44336";
+				sb.AppendLine($"<td style='background:{color};color:white;text-align:center;padding:5px;'>{val:F2}</td>");
+			}
+			sb.AppendLine("</tr>");
+		}
+		sb.AppendLine("</table></div></body></html>");
+		return sb.ToString();
 	}
 
 	private void PrepareDashboardData(AnalysisResultApiModel result)
@@ -259,14 +344,12 @@
 
 		double[][] heatMap = CalculateCorrelationMatrix(SurveyAnalysisConstants.CriteriaNames, result);
 
-		// Распределение общей оценки (по всем числовым критериям)
 		int low = 0, med = 0, high = 0;
-		foreach (var crit in criteria.Where(c => c.CriterionData.Statistics?.Distribution != null))
+		foreach (var crit in criteria.Where(c => c.CriterionData.Statistics?.PercentLow.HasValue ?? false))
 		{
-			var dist = crit.CriterionData.Statistics.Distribution;
-			low = Convert.ToInt32(crit.CriterionData.Statistics.PercentLow * 100);
-			med = Convert.ToInt32(crit.CriterionData.Statistics.PercentMedium * 100);
-			high = Convert.ToInt32(crit.CriterionData.Statistics.PercentHigh * 100);
+			low += (int)crit.CriterionData.Statistics.PercentLow!;
+			med += (int)crit.CriterionData.Statistics.PercentMedium!;
+			high += (int)crit.CriterionData.Statistics.PercentHigh!;
 		}
 
 		dashboardData = new DashboardData
@@ -300,12 +383,12 @@
 			}
 			else if (c.CriterionData!.CriterionName == SurveyAnalysisConstants.Engagement)
 			{
-				// Для вовлечённости кодируем 1 = "Да", 0 = "Нет"
+				// Для вовлечённости кодируем 1 = "Да", 10 = "Нет"
 				var engScores = new List<double>();
 				int yes = stats.YesCount ?? 0;
 				int no = stats.NoCount ?? 0;
 				for (int i = 0; i < yes; i++) engScores.Add(1);
-				for (int i = 0; i < no; i++) engScores.Add(0);
+				for (int i = 0; i < no; i++) engScores.Add(10);
 				data[c.CriterionData.CriterionName] = engScores;
 			}
 		}

@@ -72,9 +72,11 @@ public class AnalysisController : ControllerBase
     {
         var domainResult = mapper.Map<AnalysisResult>(analysisResultModel);
         var fileBytes = await pipeline.ExportStatsExcel(domainResult);
+        var fileName = $"{domainResult.ProgramInfo?.Period + " " ?? "report"}{domainResult.ProgramInfo?.Title ?? string.Empty}.xlsx";
+        HttpContext.Response.Headers["X-Filename"] = Uri.EscapeDataString(fileName);
         return File(fileBytes,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            $"{domainResult.ProgramInfo?.Period + " " ?? "report"}{domainResult.ProgramInfo?.Title ?? string.Empty}.xlsx");
+            fileName);
     }
 
     /// <summary>
@@ -85,9 +87,11 @@ public class AnalysisController : ControllerBase
     {
         var domainResult = mapper.Map<AnalysisResult>(analysisResultModel);
         var fileBytes = await pipeline.ExportReportWord(domainResult);
+        var fileName = $"{domainResult.ProgramInfo?.Period + " " ?? "report"}{domainResult.ProgramInfo?.Title ?? string.Empty}.docx";
+        HttpContext.Response.Headers["X-Filename"] = Uri.EscapeDataString(fileName);
         return File(fileBytes,
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            $"{domainResult.ProgramInfo?.Period + " " ?? "report"}{domainResult.ProgramInfo?.Title ?? string.Empty}.docx");
+            fileName);
     }
 
     /// <summary>

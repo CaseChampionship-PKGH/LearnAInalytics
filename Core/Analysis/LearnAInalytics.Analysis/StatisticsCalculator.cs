@@ -114,10 +114,13 @@ public class StatisticsCalculator : IStatisticsCalculator
         switch (question.Type)
         {
             case QuestionType.Numeric:
-                var scores = allAnswers.Where(a => a.NumericValue.HasValue)
-                                       .Select(a => a.NumericValue!.Value)
-                                       .ToList();
+                var scores = allAnswers
+                        .Where(a => a.NumericValue.HasValue)
+                        .Select(a => a.NumericValue!.Value)
+                        .ToList();
+
                 stat.AnswerCount = scores.Count;
+
                 if (scores.Count > 0)
                 {
                     stat.Average = scores.Average();
@@ -126,7 +129,13 @@ public class StatisticsCalculator : IStatisticsCalculator
                     stat.Distribution = scores
                             .GroupBy(v => (int)Math.Round(v))
                             .ToDictionary(g => g.Key, g => g.Count());
+
+                    var total = scores.Count;
+                    stat.PercentLow = 100.0 * scores.Count(v => v >= 1 && v <= 3) / total;
+                    stat.PercentMedium = 100.0 * scores.Count(v => v >= 4 && v <= 7) / total;
+                    stat.PercentHigh = 100.0 * scores.Count(v => v >= 8 && v <= 10) / total;
                 }
+
                 break;
 
             case QuestionType.Binary:
