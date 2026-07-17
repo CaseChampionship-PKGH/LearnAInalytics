@@ -31,7 +31,7 @@ public class DefaultPromptProvider : IPromptProvider
             }
             else if (stats.YesCount.HasValue)
             {
-                sb.AppendLine($"Статистика: \"Да\" — {stats.YesCount} чел. ({stats.YesPercent:F1}%), " +
+                sb.AppendLine($"Статистика: Вопрос - «{stats.Question.QuestionText}»: \"Да\" — {stats.YesCount} чел. ({stats.YesPercent:F1}%), " +
                               $"\"Нет\" — {stats.NoCount} чел. ({stats.NoPercent:F1}%).");
             }
         }
@@ -56,7 +56,7 @@ public class DefaultPromptProvider : IPromptProvider
         }
 
         sb.AppendLine("На основе этих данных напиши Примечание на 3-8 предложений деловым стилем. " +
-                      "Указывай точные цифры. Не придумывай факты, опирайся только на предоставленные ответы.");
+                      "Указывай точные цифры. Верни ответ в чистом тексте без markdown. Не придумывай факты, опирайся только на предоставленные ответы.");
         return sb.ToString();
     }
 

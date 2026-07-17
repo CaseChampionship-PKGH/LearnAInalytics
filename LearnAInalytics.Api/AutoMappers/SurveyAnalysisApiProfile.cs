@@ -12,6 +12,8 @@ public class SurveyAnalysisApiProfile : Profile
     /// </summary>
     public SurveyAnalysisApiProfile()
     {
-        CreateMap<AnalysisResultApiModel, AnalysisResult>(MemberList.Source).ReverseMap();
+        CreateMap<AnalysisResult, AnalysisResultApiModel>(MemberList.Source)
+            .ForMember(x => x.Errors, opt => opt.Ignore())
+            .ReverseMap();
     }
 }

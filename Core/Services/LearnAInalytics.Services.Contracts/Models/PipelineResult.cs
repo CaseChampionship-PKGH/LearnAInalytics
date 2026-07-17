@@ -16,9 +16,4 @@ public record PipelineResult
     /// Статистика
     /// </summary>
     public AnalysisResult AnalysisResult { get; set; } = null!;
-
-    /// <summary>
-    /// Excel
-    /// </summary>
-    public byte[] ExcelBytes { get; set; } = null!;
 }

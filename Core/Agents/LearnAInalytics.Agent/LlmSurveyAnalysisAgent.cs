@@ -28,11 +28,11 @@ public class LlmSurveyAnalysisAgent : ISurveyCriteriaAnalysisAgent
         this.llmFactory = llmFactory;
     }
 
-    async Task<string> ISurveyCriteriaAnalysisAgent.AnalyzeCriterionAsync(CriterionPromptData criterionData, LlmVariant llmVariant)
+    async Task<string> ISurveyCriteriaAnalysisAgent.AnalyzeAndGenerateCriterionNoteAsync(CriterionPromptData criterionData, LlmVariant llmVariant)
     {
         var prompt = promptProvider.BuildCriterionNotePrompt(criterionData);
         var llmClient = llmFactory.CreateLLmClient(llmVariant);
-        var response = await llmClient.SendRequestAsync(new LlmRequest { RawPrompt = prompt }, "analysis");
+        var response = await llmClient.SendRequestAsync(new LlmRequest { RawPrompt = prompt }, "note");
 
         var raw = response.RawResponse;
         var cleaned = raw.Replace("```json", "").Replace("```", "").Trim();
@@ -43,7 +43,7 @@ public class LlmSurveyAnalysisAgent : ISurveyCriteriaAnalysisAgent
     {
         var prompt = promptProvider.BuildTrajectoryPrompt(allData, criterionNotes);
         var llmClient = llmFactory.CreateLLmClient(llmVariant);
-        var response = await llmClient.SendRequestAsync(new LlmRequest { RawPrompt = prompt }, "analysis");
+        var response = await llmClient.SendRequestAsync(new LlmRequest { RawPrompt = prompt }, "trajectory");
 
         var raw = response.RawResponse;
         var cleaned = raw.Replace("```json", "").Replace("```", "").Trim();

@@ -15,22 +15,21 @@ public class MockLlmClient : ILlmClient
     {
         string mockResponse;
 
-        if (targetTest == "analysis")
+        if (targetTest == "trajectory")
         {
             mockResponse = @"```json
                             {
-                                ""results"": [
-                                {
-                                    ""userId"": ""20250801007"",
-                                    ""similarityPercent"": 85,
-                                    ""verdict"": ""correct"",
-                                    ""comment"": ""Ответ содержит ключевые понятия, но неполный.""
-                                }
-                                ]
+                                ""needForProgram"": ""потребность в дальнейшей реализации программы"",
+                                ""admissionCorrection"": ""нужна ли корректировка отбора слушателей"",
+                                ""programSupplement"": ""что нужно добавить в программу"",
+                                ""hoursChange"": ""нужно ли изменение количества часов"",
+                                ""formChange"": ""нужно ли изменение формы обучения"",
+                                ""excludedTopicsSummary"": ""обобщение предложений об исключении тем"",
+                                ""suggestedTopicsSummary"": ""обобщение предложений о добавлении тем""
                             }
                             ```";
         }
-        else if (targetTest == "report")
+        else if (targetTest == "note")
         {
             mockResponse = "Рекомендуется пересмотреть формулировку вопроса и добавить пояснения в материал.";
         }

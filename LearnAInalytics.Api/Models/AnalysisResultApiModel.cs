@@ -28,4 +28,9 @@ public class AnalysisResultApiModel
     /// Траектория изменения программы по результатам итогового опроса слушателей
     /// </summary>
     public Trajectory? Trajectory { get; set; }
+
+    /// <summary>
+    /// Список возникших в процессе валидации ошибок
+    /// </summary>
+    public List<string> Errors { get; set; } = null!;
 }

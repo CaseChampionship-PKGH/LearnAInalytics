@@ -1,11 +1,11 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using LearnAInalytics.Agent.Contracts.Enums;
 using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Agent.Contracts.Models;
 using LearnAInalytics.Agent.OpenAI.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace LearnAInalytics.Agent.OpenAI;
 
@@ -60,7 +60,7 @@ public class OpenAiCompatibleLlmClient : ILlmClient
         return new LlmResponse()
         {
             RawResponse = result?.Choices?.FirstOrDefault()?.Message?.Content
-               ?? throw new InvalidOperationException("Пустой ответ от внешнего LLM")
+               ?? "ОШИБКА: Пустой ответ от внешнего LLM"
         };
     }
 }

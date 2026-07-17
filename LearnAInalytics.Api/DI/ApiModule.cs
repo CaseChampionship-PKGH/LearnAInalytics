@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using LearnAInalytics.Agent;
 using LearnAInalytics.Agent.Contracts.Interfaces;
-using LearnAInalytics.Agent.OpenAI;
-using LearnAInalytics.Agent.YandexGPT;
 using LearnAInalytics.Analysis;
 using LearnAInalytics.Api.AutoMappers;
 using LearnAInalytics.Common.Mvc.Extensions;
@@ -26,21 +24,23 @@ public class ApiModule : Module
     /// <inheritdoc />
     protected override void Load(IServiceCollection services)
     {
+        var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyCsvParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyExcelParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, AgentResponseJsonParser>(ServiceLifetime.Singleton);
 
         services.AddHttpClient("YandexGPT", client =>
         {
-            client.BaseAddress = new Uri("https://llm.api.cloud.yandex.net/");
+            client.BaseAddress = new Uri(config["RussianLLM:BaseUrl"]!);
         });
-        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, YandexGPTllmClient>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, MockLlmClient>(ServiceLifetime.Singleton);
 
         services.AddHttpClient("OpenAI", client =>
         {
-            client.BaseAddress = new Uri("https://openrouter.ai/api/v1/");
+            client.BaseAddress = new Uri(config["ForeignLLM:BaseUrl"]!);
         });
-        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, OpenAiCompatibleLlmClient>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, MockLlmClient>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<ParserFactory>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<FormatDetector>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<StatisticsCalculator>(ServiceLifetime.Singleton);

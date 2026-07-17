@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LearnAInalytics.Api.Controllers;
 
 /// <summary>
-/// Управление анализом тестов
+/// Управление анализом анкет
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -29,7 +29,7 @@ public class AnalysisController : ControllerBase
     }
 
     /// <summary>
-    /// Запуск анализа и получение структурированного отчёта (JSON).
+    /// Запуск анализа и получение структурированного отчёта
     /// </summary>
     [HttpPost("run")]
     public async Task<IActionResult> RunAnalysis(
@@ -52,6 +52,7 @@ public class AnalysisController : ControllerBase
         {
             var result = await pipeline.RunAsync(context);
             var mappedResult = mapper.Map<AnalysisResultApiModel>(result.AnalysisResult);
+            mappedResult.Errors = result.Errors;
             return Ok(mappedResult);
         }
         catch (ParsingException ex)
@@ -95,7 +96,7 @@ public class AnalysisController : ControllerBase
     }
 
     /// <summary>
-    /// Проверка работоспособности сервиса.
+    /// Проверка работоспособности сервиса
     /// </summary>
     [HttpGet("health")]
     public IActionResult Health() => Ok(new { status = "healthy", timestamp = DateTime.UtcNow });

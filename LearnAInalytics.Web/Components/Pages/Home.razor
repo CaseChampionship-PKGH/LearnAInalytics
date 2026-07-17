@@ -38,7 +38,7 @@
 						</select>
 					</div>
 
-					<button class="btn btn-primary btn-lg w-100" @onclick="StartAnalysis" disabled="@isLoading">
+					<button class="btn btn-warning btn-lg w-100" @onclick="StartAnalysis" disabled="@isLoading">
 						@if (isLoading)
 						{
 							<span class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -70,10 +70,21 @@
 				</div>
 			}
 
+			@if (warnings != null && warnings.Count > 0)
+			{
+				@foreach (var warning in warnings)
+				{
+					<div class="alert alert-warning d-flex align-items-center" role="alert">
+						<span>@warning</span>
+						<button type="button" class="btn-close ms-auto" @onclick="() => warnings.Remove(warning)"></button>
+					</div>
+				}
+			}
+
 			@if (dashboardData != null)
 			{
 				<div class="card mt-4">
-					<div class="card-header bg-primary text-white">
+					<div class="card-header bg-warning text-dark">
 						<h5>Результаты анализа</h5>
 					</div>
 					<div class="card-body">
@@ -129,7 +140,7 @@
 						<button class="btn btn-info" @onclick="DownloadWord">
 							Скачать Word
 						</button>
-						<button class="btn btn-outline-primary" @onclick="DownloadDashboard">
+						<button class="btn btn-warning" @onclick="DownloadDashboard">
 							Скачать Html dashboard
 						</button>
 					</div>
@@ -144,6 +155,7 @@
 	private string selectedVariant = "foreign";
 	private bool isLoading;
 	private string? errorMessage;
+	private List<string>? warnings;
 	private AnalysisResultApiModel? analysisResult;
 	private AnalysisResultApiModel? analysisResultObject;
 	private string? analysisDataJson;
@@ -163,7 +175,6 @@
 	{
 		await JS.InvokeVoidAsync("renderBarChart", dashboardData!.CriteriaLabels, dashboardData.AverageScores.Values.ToArray());
 		await JS.InvokeVoidAsync("renderRadarChart", dashboardData.CriteriaLabels, dashboardData.SpiderValues.Values.ToArray());
-		await JS.InvokeVoidAsync("renderHeatMap", dashboardData.CriteriaLabels, dashboardData.HeatMapData);
 		await JS.InvokeVoidAsync("renderDistributionChart", dashboardData.DistributionCounts);
 	}
 
@@ -204,12 +215,12 @@
 					});
 
 				analysisResult = analysisResultObject;
+				warnings = analysisResult!.Errors;
 				PrepareDashboardData(analysisResultObject!);
 				StateHasChanged();
 				await Task.Delay(200); // дождаться рендера
 				await JS.InvokeVoidAsync("renderBarChart", dashboardData!.CriteriaLabels, dashboardData.AverageScores.Values.ToArray());
 				await JS.InvokeVoidAsync("renderRadarChart", dashboardData.CriteriaLabels, dashboardData.SpiderValues.Values.ToArray());
-				await JS.InvokeVoidAsync("renderHeatMap", dashboardData.CriteriaLabels, dashboardData.HeatMapData);
 				await JS.InvokeVoidAsync("renderDistributionChart", dashboardData.DistributionCounts);
 			}
 			else

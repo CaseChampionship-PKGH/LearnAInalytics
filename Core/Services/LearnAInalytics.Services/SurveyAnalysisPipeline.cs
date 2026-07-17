@@ -1,4 +1,6 @@
-﻿using LearnAInalytics.Agent.Contracts.Interfaces;
+﻿using LearnAInalytics.Agent.Contracts.Enums;
+using LearnAInalytics.Agent.Contracts.Interfaces;
+using LearnAInalytics.Analysis.Contracts.Enums;
 using LearnAInalytics.Analysis.Contracts.Interfaces;
 using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Entities.Models;
@@ -61,11 +63,9 @@ public class SurveyAnalysisPipeline : IPipelineService
 
         foreach (var promptData in aggregationResult.AllCriteriaData)
         {
-            //var note = await surveyCriteriaAnalysisAgent.AnalyzeCriterionAsync(promptData, context.AnalysisMethod == AnalysisMethod.RussianAiAgent
-            //        ? LlmVariant.Russian
-            //        : LlmVariant.Foreign);
-
-            var note = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis eros varius, viverra neque et, pretium ligula. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Maecenas id blandit sapien. Mauris eu mauris urna. Fusce auctor tellus maximus viverra cursus. In aliquam et augue non fringilla. Vestibulum non congue ex. Proin feugiat leo quis nisl scelerisque pulvinar. Nam consequat quam nec urna congue, sed tristique erat molestie. Pellentesque pharetra neque sit amet tellus vestibulum, a hendrerit nisi fermentum. In lobortis laoreet ornare. Suspendisse eros libero, placerat vitae nulla in, rhoncus blandit nibh. Suspendisse tincidunt pretium enim, efficitur dictum leo iaculis vel. Nam eget ante nibh. Etiam mauris erat, aliquet vel mauris ac, ullamcorper imperdiet massa. Duis dolor nisl, ultricies vitae lorem id, eleifend egestas sem.\r\n\r\nNulla facilisi. Praesent eget ultricies enim. Ut non lobortis massa, vitae imperdiet dui. Fusce sed bibendum dolor. Morbi ac orci in est consectetur placerat nec ac dui. Aenean ultrices mi sit amet sapien vehicula, eu semper nisl iaculis. Morbi eu risus quis nisl sodales euismod at in libero. Cras ut malesuada libero. Aliquam erat volutpat. Donec ornare placerat metus, sollicitudin semper mi imperdiet et. Nam ac risus sit amet justo tempor eleifend. Cras eget varius felis.\r\n\r\nDonec aliquet ex non felis consequat, ut facilisis lorem pulvinar. Nunc at nisl vitae elit tincidunt faucibus. Duis arcu ex, vestibulum et erat quis, sollicitudin luctus magna. Aliquam fermentum tincidunt risus, eget vestibulum neque euismod in. Nam vitae eros id elit lacinia ultrices. Curabitur ut blandit tellus. Sed elementum feugiat sem. Integer dui tellus, cursus quis efficitur eget, faucibus eu sem. Fusce et suscipit risus. Praesent sollicitudin vel ex et dictum. Nunc vitae volutpat sapien. Fusce vestibulum arcu diam, ac vehicula enim luctus in. Suspendisse potenti. Donec ut eros quam.\r\n\r\n";
+            var note = await surveyCriteriaAnalysisAgent.AnalyzeAndGenerateCriterionNoteAsync(promptData, context.AnalysisMethod == AnalysisMethod.RussianAiAgent
+                    ? LlmVariant.Russian
+                    : LlmVariant.Foreign);
 
             criterionAnalysisList.Add(new CriterionAnalysis
             {
@@ -74,22 +74,11 @@ public class SurveyAnalysisPipeline : IPipelineService
             });
         }
 
-        //var trajectory = await surveyCriteriaAnalysisAgent.AnalyzeTrajectoryAsync(aggregationResult,
-        //    criterionAnalysisList.Select(x => x.Note ?? string.Empty).ToList(),
-        //    context.AnalysisMethod == AnalysisMethod.RussianAiAgent
-        //            ? LlmVariant.Russian
-        //            : LlmVariant.Foreign);
-
-        var trajectory = new Trajectory()
-        {
-            SuggestedTopicsSummary = "Nulla facilisi. Praesent eget ultricies enim. Ut non lobortis massa, vitae imperdiet dui. Fusce sed bibendum dolor. Morbi ac orci in est consectetur placerat nec ac dui. Aenean ultrices mi sit amet sapien vehicula, eu semper nisl iaculis. Morbi eu risus quis nisl sodales euismod at in libero. Cras ut malesuada libero. Aliquam erat volutpat. Donec ornare placerat metus, sollicitudin semper mi imperdiet et. Nam ac risus sit amet justo tempor eleifend. Cras eget varius felis.\r\n\r\n",
-            ExcludedTopicsSummary = "Vivamus posuere quam neque. Ut diam eros, luctus eu ligula eu, pellentesque convallis libero. Mauris dignissim ex arcu, nec gravida velit pellentesque id. Nunc a magna sit amet nunc venenatis viverra id in dui. Fusce vitae efficitur felis, et eleifend purus. Duis et odio odio. Duis ac magna consequat, tristique risus eu, tincidunt urna. ",
-            ProgramSupplement = "Pellentesque scelerisque neque nulla, nec volutpat justo vehicula mattis. Vivamus porttitor purus bibendum odio maximus, id facilisis mi suscipit. Etiam ultrices convallis metus, id iaculis magna scelerisque eget. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ac sapien ligula. Sed ut porttitor sem. ",
-            NeedForProgram = "Нет необходимости",
-            HoursChange = "Нет необходимости",
-            AdmissionCorrection = "Нет необходимости",
-            FormChange = "Нет необходимости",
-        };
+        var trajectory = await surveyCriteriaAnalysisAgent.AnalyzeTrajectoryAsync(aggregationResult,
+            criterionAnalysisList.Select(x => x.Note ?? string.Empty).ToList(),
+            context.AnalysisMethod == AnalysisMethod.RussianAiAgent
+                    ? LlmVariant.Russian
+                    : LlmVariant.Foreign);
 
         var result = new AnalysisResult()
         {
@@ -99,63 +88,10 @@ public class SurveyAnalysisPipeline : IPipelineService
             Trajectory = trajectory
         };
 
-        //var batches = batchBuilder.Build(validationResult);
-
-        //var allQuestionResults = new List<QuestionAnalysisResult>();
-
-        //foreach (var batch in batches)
-        //{
-        //    var needAnalysis = batch.Answers
-        //        .Where(a => a.PreStatus == AnswerPreStatus.NeedAnalysis)
-        //        .ToList();
-
-        //    var aiResults = new List<ComparisonResult>();
-        //    if (needAnalysis.Count != 0)
-        //    {
-        //        var agentResponse = await testAnalysisAgent.AnalyzeBatchAsync(batch, context.AnalysisMethod == AnalysisMethod.RussianAiAgent
-        //            ? LlmVariant.Russian
-        //            : LlmVariant.Foreign);
-
-        //        aiResults = agentResponse.Results.Select(r => new ComparisonResult
-        //        {
-        //            UserId = r.UserId,
-        //            SimilarityPercent = r.SimilarityPercent,
-        //            Verdict = r.Verdict,
-        //            Comment = r.Comment
-        //        }).ToList();
-        //    }
-
-        //    var finalResults = batch.Answers.Select(item =>
-        //    {
-        //        if (item.PreStatus == AnswerPreStatus.ExactMatch)
-        //        {
-        //            return new ComparisonResult { UserId = item.UserId, SimilarityPercent = 100, Verdict = "correct" };
-        //        }
-        //        else if (item.PreStatus == AnswerPreStatus.Empty)
-        //        {
-        //            return new ComparisonResult { UserId = item.UserId, SimilarityPercent = 0, Verdict = "incorrect", Comment = "пустой ответ" };
-        //        }
-        //        return aiResults.FirstOrDefault(r => r.UserId == item.UserId) ?? new ComparisonResult { UserId = item.UserId, SimilarityPercent = 50, Verdict = "partial" };
-        //    }).ToList();
-
-        //    allQuestionResults.Add(new QuestionAnalysisResult
-        //    {
-        //        Question = batch.Question,
-        //        Results = finalResults
-        //    });
-        //}
-
-        //var reportData = await reportBuilder.BuildAsync(allQuestionResults, context.AnalysisMethod);
-        //var excelBytes = reportExporter.ExportToExcel(reportData);
-
-        //reportData.ParsedUsers = parsedUserAnswers;
-
         return new PipelineResult()
         {
             AnalysisResult = result,
             Errors = validationResult.Warnings.ToList(),
-            //ReportData = reportData,
-            //ExcelReport = excelBytes,
         };
     }
 

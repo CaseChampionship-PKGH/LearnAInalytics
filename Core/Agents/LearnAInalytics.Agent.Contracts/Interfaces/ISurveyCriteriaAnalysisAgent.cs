@@ -12,7 +12,7 @@ public interface ISurveyCriteriaAnalysisAgent
     /// <summary>
     /// Проанализировать критерий
     /// </summary>
-    Task<string> AnalyzeCriterionAsync(CriterionPromptData criterionData, LlmVariant llmVariant);
+    Task<string> AnalyzeAndGenerateCriterionNoteAsync(CriterionPromptData criterionData, LlmVariant llmVariant);
 
     /// <summary>
     /// Проанализировать траекторию развития по всем данным
