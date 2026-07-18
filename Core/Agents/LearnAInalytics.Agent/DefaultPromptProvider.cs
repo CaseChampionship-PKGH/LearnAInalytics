@@ -15,7 +15,6 @@ public class DefaultPromptProvider : IPromptProvider
         sb.AppendLine($"Проанализируй ответы слушателей по критерию «{criterionData.CriterionName}».");
         sb.AppendLine();
 
-        // Статистика
         var stats = criterionData.Statistics;
         if (stats != null)
         {
@@ -36,7 +35,6 @@ public class DefaultPromptProvider : IPromptProvider
             }
         }
 
-        // Ответы на вопросы
         sb.AppendLine();
         sb.AppendLine("Ответы на вопросы:");
         foreach (var qa in criterionData.Questions)
