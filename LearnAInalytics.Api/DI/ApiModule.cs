@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using LearnAInalytics.Agent;
 using LearnAInalytics.Agent.Contracts.Interfaces;
+using LearnAInalytics.Agent.OpenAI;
+using LearnAInalytics.Agent.YandexGPT;
 using LearnAInalytics.Analysis;
 using LearnAInalytics.Api.AutoMappers;
 using LearnAInalytics.Common.Mvc.Extensions;
@@ -34,13 +36,13 @@ public class ApiModule : Module
         {
             client.BaseAddress = new Uri(config["RussianLLM:BaseUrl"]!);
         });
-        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, MockLlmClient>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, YandexGPTllmClient>(ServiceLifetime.Singleton);
 
         services.AddHttpClient("OpenAI", client =>
         {
             client.BaseAddress = new Uri(config["ForeignLLM:BaseUrl"]!);
         });
-        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, MockLlmClient>(ServiceLifetime.Singleton);
+        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, OpenAiCompatibleLlmClient>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<ParserFactory>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<FormatDetector>(ServiceLifetime.Singleton);
         services.RegisterAsImplementedInterfaces<StatisticsCalculator>(ServiceLifetime.Singleton);
