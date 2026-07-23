@@ -24,7 +24,7 @@ public class OpenAiCompatibleLlmClient : ILlmClient
     /// </summary>
     public OpenAiCompatibleLlmClient(IHttpClientFactory httpClientFactory, IConfiguration config)
     {
-        httpClient = httpClientFactory.CreateClient("OpenAI");
+        httpClient = httpClientFactory.CreateClient("ForeignLLM");
         apiKey = config.GetRequiredSection("ForeignLLM").GetValue<string>("ApiKey")!;
         requestUri = config.GetRequiredSection("ForeignLLM").GetValue<string>("RequestUri")!;
         model = config.GetRequiredSection("ForeignLLM").GetValue<string>("Model")!;

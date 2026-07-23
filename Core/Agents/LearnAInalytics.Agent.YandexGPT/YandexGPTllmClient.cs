@@ -1,11 +1,11 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using LearnAInalytics.Agent.Contracts.Enums;
 using LearnAInalytics.Agent.Contracts.Interfaces;
 using LearnAInalytics.Agent.Contracts.Models;
 using LearnAInalytics.Agent.YandexGPT.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace LearnAInalytics.Agent.YandexGPT;
 
@@ -25,7 +25,7 @@ public class YandexGPTllmClient : ILlmClient
     /// </summary>
     public YandexGPTllmClient(IHttpClientFactory httpClientFactory, IConfiguration config)
     {
-        httpClient = httpClientFactory.CreateClient("YandexGPT");
+        httpClient = httpClientFactory.CreateClient("RussianLLM");
         model = config.GetRequiredSection("RussianLLM").GetValue<string>("Model")!;
         requestUri = config.GetRequiredSection("RussianLLM").GetValue<string>("RequestUri")!;
         apiKey = config.GetRequiredSection("RussianLLM").GetValue<string>("ApiKey")!;
