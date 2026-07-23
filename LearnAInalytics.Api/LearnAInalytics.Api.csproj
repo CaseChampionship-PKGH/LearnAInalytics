@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\LearnAInalytics.Common.Mvc\LearnAInalytics.Common.Mvc.csproj" />
+    <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent.GigaChat\LearnAInalytics.Agent.GigaChat.csproj" />
     <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent.OpenAI\LearnAInalytics.Agent.OpenAI.csproj" />
     <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent.YandexGPT\LearnAInalytics.Agent.YandexGPT.csproj" />
     <ProjectReference Include="..\Core\Agents\LearnAInalytics.Agent\LearnAInalytics.Agent.csproj" />

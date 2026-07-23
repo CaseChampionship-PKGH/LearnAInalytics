@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using LearnAInalytics.Agent;
 using LearnAInalytics.Agent.Contracts.Interfaces;
+using LearnAInalytics.Agent.GigaChat;
 using LearnAInalytics.Agent.OpenAI;
-using LearnAInalytics.Agent.YandexGPT;
 using LearnAInalytics.Analysis;
 using LearnAInalytics.Api.AutoMappers;
 using LearnAInalytics.Common.Mvc.Extensions;
@@ -32,13 +32,47 @@ public class ApiModule : Module
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, SurveyExcelParser>(ServiceLifetime.Singleton);
         services.RegisterMultipleInterfacesAssignableTo<IDataParser, AgentResponseJsonParser>(ServiceLifetime.Singleton);
 
-        services.AddHttpClient("YandexGPT", client =>
+        services.AddHttpClient("RussianLLMAccessToken", client =>
+        {
+            client.BaseAddress = new Uri(config["RussianLLM:TokenUrl"]!);
+        })
+        .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                if (config.GetSection("RussianLLM").GetValue("BypassSsl", false)! == true)
+                {
+                    return new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                    };
+                }
+                else
+                {
+                    return new HttpClientHandler();
+                }
+            });
+
+        services.AddHttpClient("RussianLLM", client =>
         {
             client.BaseAddress = new Uri(config["RussianLLM:BaseUrl"]!);
+        })
+        .ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            if (config.GetSection("RussianLLM").GetValue("BypassSsl", false)! == true)
+            {
+                return new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+            }
+            else
+            {
+                return new HttpClientHandler();
+            }
         });
-        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, YandexGPTllmClient>(ServiceLifetime.Singleton);
 
-        services.AddHttpClient("OpenAI", client =>
+        services.RegisterMultipleInterfacesAssignableTo<ILlmClient, GigaChatLlmClient>(ServiceLifetime.Singleton);
+
+        services.AddHttpClient("ForeignLLM", client =>
         {
             client.BaseAddress = new Uri(config["ForeignLLM:BaseUrl"]!);
         });
