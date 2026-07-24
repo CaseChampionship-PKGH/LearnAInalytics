@@ -87,12 +87,9 @@ public class GigaChatLlmClient : ILlmClient
         using var tokenRequest = new HttpRequestMessage(HttpMethod.Post, tokenUrl);
         tokenRequest.Headers.Authorization = new AuthenticationHeaderValue("Basic", apiKey);
         tokenRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        tokenRequest.Headers.Add("RqUID", Guid.NewGuid().ToString("N"));
+        tokenRequest.Headers.Add("RqUID", Guid.NewGuid().ToString());
 
-        tokenRequest.Content = new FormUrlEncodedContent(
-        [
-            new KeyValuePair<string, string>("scope", scope)
-        ]);
+        tokenRequest.Content = new StringContent($"scope={scope}", Encoding.UTF8, "application/x-www-form-urlencoded");
 
         var tokenResponse = await tokenHttpClient.SendAsync(tokenRequest);
         tokenResponse.EnsureSuccessStatusCode();
