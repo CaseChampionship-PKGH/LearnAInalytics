@@ -4,7 +4,6 @@ using LearnAInalytics.Analysis.Contracts.Models;
 using LearnAInalytics.Entities.Models;
 using LearnAInalytics.Parsing.Contracts.Enums;
 using LearnAInalytics.Parsing.Contracts.Interfaces;
-using LearnAInalytics.Parsing.Contracts.Models;
 using LearnAInalytics.Reporting.Contracts.Interfaces;
 using LearnAInalytics.Reporting.Contracts.Models;
 using LearnAInalytics.Services.Contracts.Interfaces;
